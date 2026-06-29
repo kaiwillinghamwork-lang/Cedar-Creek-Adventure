@@ -24,20 +24,13 @@ The page invites visitors to explore the property and the guided trips on offer:
 - Fully responsive, with a mobile-tuned layout and tap-friendly targets.
 - Accessible: ARIA roles, keyboard-operable map hotspots, focus trapping in modals.
 
-## Status: pre-launch
-
-The public home page is a branded **Coming Soon** splash while we set up SEO, analytics, and
-brand. The full interactive site is built and lives at **`/preview.html`** (marked `noindex`
-and disallowed in `robots.txt`, so it stays out of search results until launch). Swap the two
-when you're ready to go live.
-
 ## Project structure
 
 ```
-index.html        public "Coming Soon" splash (SEO meta + GA4 placeholder)
-preview.html      the full interactive site (internal, noindex until launch)
-robots.txt        allows the home page, disallows /preview.html
-css/style.css     all styling for the full site
+index.html        the full interactive site (home page)
+coming-soon.html  optional pre-launch splash (SEO meta + GA4 placeholder), not linked
+robots.txt        allows crawlers
+css/style.css     all styling
 js/data.js        content: every building and activity (loaded first)
 js/app.js         behavior: renders cards, wires the map, opens modals
 js/booking.js     "Plan Your Stay" flow + Add-to-Google-Calendar link
@@ -46,11 +39,11 @@ images/           building & activity photos
 
 `data.js` is where you edit what a building or trip *says*; `app.js` is the behavior.
 
-### Going live later
+### Optional: show "Coming Soon" instead
 
-1. Rename `preview.html` → `index.html` (replacing the splash), or copy its content over.
-2. Remove the `noindex` meta tag from the file and drop the `Disallow: /preview.html` line.
-3. Add your real Google Analytics ID (see the placeholder in `index.html`).
+A branded **Coming Soon** splash is kept in `coming-soon.html` (with SEO meta tags and a
+Google Analytics placeholder). To gate the site before launch, swap the two files — make
+`coming-soon.html` the `index.html`, and move the full site to another name.
 
 ## Running it
 
