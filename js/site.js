@@ -5,6 +5,31 @@
 /*   someone is logged in (see auth.js / localStorage).         */
 /* ============================================================ */
 
+/* ---- where inquiries go (EDIT THESE) ----
+   • email / phone show on the site and are used by the "email us" buttons.
+   • formspree: optional. Create a free form at https://formspree.io, paste
+     its endpoint here (e.g. 'https://formspree.io/f/abcwxyz'), and submissions
+     post straight to your inbox without opening the visitor's email app.    */
+const CONTACT = {
+  email: 'kai.willingham.work@gmail.com',
+  phone: '(509) 555-0142',
+  formspree: ''
+};
+window.CONTACT = CONTACT;
+
+/* send an inquiry: posts to Formspree if configured, otherwise opens a
+   pre-filled email from the visitor to you. Returns a Promise<bool>. */
+window.ccInquiry = function(subject, body, replyEmail){
+  if(CONTACT.formspree){
+    return fetch(CONTACT.formspree, {
+      method:'POST', headers:{ 'Accept':'application/json', 'Content-Type':'application/json' },
+      body: JSON.stringify({ subject, email: replyEmail || '', message: body })
+    }).then(r => r.ok).catch(() => false);
+  }
+  window.location.href = `mailto:${CONTACT.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return Promise.resolve(true);
+};
+
 function renderSiteChrome(){
   const page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const hasSideMenu = !!document.getElementById('sideMenu');   // only true on the home page
@@ -19,6 +44,7 @@ function renderSiteChrome(){
     { label:'Home',        href:'index.html' },
     { label:'About Us',    href:'about.html' },
     { label:'Hammer Camp', href:'hammer-camp.html' },
+    { label:'Contact',     href:'contact.html' },
   ];
 
   function navLinkHTML(l){
@@ -55,8 +81,12 @@ function renderSiteChrome(){
     <img src="images/logo.jpg" alt="" class="footer-logo">
     <p><b>Cedar Creek Hunt &amp; Adventure Basecamp</b></p>
     <p>3928 Cedar Creek Rd · Colville, WA · 28 acres on East Fork Cedar Creek</p>
+    <p class="footer-contact">
+      <a href="mailto:${CONTACT.email}">✉️ ${CONTACT.email}</a>
+      <a href="tel:${CONTACT.phone.replace(/[^0-9+]/g,'')}">📞 ${CONTACT.phone}</a>
+    </p>
     <nav class="footer-links">
-      <a href="index.html">Home</a><a href="about.html">About Us</a><a href="hammer-camp.html">Hammer Camp</a><a href="schedule.html">Plan a Stay</a><a href="login.html">Log in</a>
+      <a href="index.html">Home</a><a href="about.html">About Us</a><a href="hammer-camp.html">Hammer Camp</a><a href="schedule.html">Plan a Stay</a><a href="contact.html">Contact</a><a href="login.html">Log in</a>
     </nav>
     <p class="footer-fine">We don't rent beds — we sell the days you'll remember. · Concept renderings, not to scale.</p>
   </footer>`;

@@ -74,7 +74,18 @@ function renderSummary(){
         <b>${money(x.c.price)}</b>
       </div>`).join('')
     + `<div class="camp-sum-total"><span>Total</span><b>${money(total)}</b></div>`
-    + `<p class="camp-sum-note">Prices are estimates — we'll confirm your camper's spot and payment after you reach out. Add each week to your calendar so you don't forget.</p>`;
+    + `<button type="button" class="btn btn-primary camp-request-btn" id="campRequest">📧 Request these weeks</button>`
+    + `<p class="camp-sum-note">Prices are estimates — send your request and we'll confirm your camper's spot and payment. Nothing's charged here.</p>`;
+}
+
+function requestCamps(){
+  const items = selectedWeeks();
+  if(!items.length) return;
+  const L = ['Hammer Camp registration request', ''];
+  items.forEach(x => L.push(`• ${x.c.ageLabel} — ${x.w.label} ($${x.c.price.toLocaleString()})`));
+  L.push('', `Total (estimate): ${money(items.reduce((s,x)=>s+x.c.price,0))}`, '',
+         "Camper's name & age: ", 'Parent/guardian name: ', 'Best phone or email to reach you: ');
+  if(window.ccInquiry) window.ccInquiry('Hammer Camp registration request', L.join('\n'));
 }
 
 if(grid && sumEl){
@@ -82,5 +93,6 @@ if(grid && sumEl){
     const wk = e.target.closest('.camp-week[data-key]');
     if(wk){ const k = `${wk.dataset.key}:${wk.dataset.idx}`; sel[k] = !sel[k]; render(); }
   });
+  sumEl.addEventListener('click', e => { if(e.target.closest('#campRequest')) requestCamps(); });
   render();
 }

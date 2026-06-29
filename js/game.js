@@ -10,82 +10,49 @@
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
-  const TILE = 16;
+  const TILE = (typeof GAME_TILE !== 'undefined') ? GAME_TILE : 16;
   const VIEW_W = canvas.width, VIEW_H = canvas.height;      // 352 x 224
-  const MAP_W = 50, MAP_H = 29;
+  const MAP = (typeof getActiveMap === 'function') ? getActiveMap() : { w:32, h:20, player:{tx:4,ty:4}, buildings:[], terrain:[] };
+  const MAP_W = MAP.w, MAP_H = MAP.h;
   const WORLD_W = MAP_W * TILE, WORLD_H = MAP_H * TILE;
-
-  /* ---------- world (laid out to match the property site map) ---------- */
-  const terrain = [], solid = [];   // terrain: 'g' grass, 'w' water, 'p' path, 'b' bridge
-  for(let y=0;y<MAP_H;y++){ terrain[y]=[]; solid[y]=[]; for(let x=0;x<MAP_W;x++){ terrain[y][x]='g'; solid[y][x]=false; } }
   const inB=(i,j)=>i>=0&&j>=0&&i<MAP_W&&j<MAP_H;
 
-  // rasterize a polyline across tiles (brush = extra radius in tiles)
-  function tline(pts, brush, fn){
-    for(let k=0;k<pts.length-1;k++){
-      const [x0,y0]=pts[k], [x1,y1]=pts[k+1];
-      const steps=Math.max(Math.abs(x1-x0),Math.abs(y1-y0))*2 || 1;
-      for(let s=0;s<=steps;s++){
-        const cx=Math.round(x0+(x1-x0)*s/steps), cy=Math.round(y0+(y1-y0)*s/steps);
-        for(let bj=-brush;bj<=brush;bj++) for(let bi=-brush;bi<=brush;bi++) if(inB(cx+bi,cy+bj)) fn(cx+bi,cy+bj);
-      }
+  /* ---------- build terrain / trees from the map data (see world.js) ---------- */
+  const terrain = [], solid = [], trees = [], flowers = [];
+  const CODE = { '.':'g', 'g':'g', 'w':'w', 'p':'p', 'b':'b', 't':'g' };   // 't' draws grass + a tree object
+  for(let j=0;j<MAP_H;j++){
+    terrain[j]=[]; solid[j]=[];
+    const row = MAP.terrain[j] || '';
+    for(let i=0;i<MAP_W;i++){
+      const c = row[i] || '.';
+      terrain[j][i] = CODE[c] || 'g';
+      solid[j][i] = (c==='w');
+      if(c==='t'){ solid[j][i]=true; trees.push({ x:i*TILE+TILE/2, y:j*TILE+TILE, i, j }); }
     }
   }
+  // grass flowers (deterministic decoration)
+  let fs=98765; const frnd=()=>{ fs=(fs*1664525+1013904223)>>>0; return fs/4294967296; };
+  for(let k=0;k<80;k++){ const i=(frnd()*MAP_W)|0, j=(2+frnd()*(MAP_H-3))|0; if(terrain[j]&&terrain[j][i]==='g'&&!solid[j][i]) flowers.push({ x:i*TILE+(4+(frnd()*8|0)), y:j*TILE+(6+(frnd()*7|0)), c:frnd()<0.5?'#e85d6a':'#f2c14e' }); }
 
-  // East Fork Cedar Creek — a clean horizontal run, then a diagonal down-right
-  tline([[0,7],[28,7],[49,22]], 0, (i,j)=>{ terrain[j][i]='w'; solid[j][i]=true; });
-  // gravel roads: Cedar Creek Rd across the top, the center driveway, the west spur
-  const pave=(i,j)=>{ if(terrain[j][i]!=='w'){ terrain[j][i]='p'; solid[j][i]=false; } };
-  tline([[0,2],[32,2],[49,17]], 0, pave);            // main road
-  tline([[18,2],[18,21],[28,24]], 0, pave);          // center driveway → owner's lodge
-  tline([[2,13],[18,13]], 0, pave);                  // spur to the west buildings
-  // bridge where the driveway crosses the creek
-  [[17,7],[18,7],[19,7]].forEach(([i,j])=>{ terrain[j][i]='b'; solid[j][i]=false; });
-
-  // buildings — key matches BUILDINGS in data.js (positions from the site map)
-  const buildings = [
-    { key:'outdoor',    name:'Creek-side Fire Pit', tx:2,  ty:10, tw:2, th:2, type:'fire' },
-    { key:'bathhouse',  name:'Bathhouse',          tx:8,  ty:10, tw:3, th:2, roof:'#6d8aa6', wall:'#557390' },
-    { key:'rv',         name:'RV & Tent Sites',    tx:1,  ty:14, tw:6, th:3, type:'camp' },
-    { key:'cabins',     name:'The Cabins',         tx:8,  ty:14, tw:5, th:3, roof:'#7a8a3f', wall:'#5f6b33' },
-    { key:'central',    name:'Central Lodge',      tx:20, ty:9,  tw:5, th:3, roof:'#8a5630', wall:'#6f4424' },
-    { key:'processing', name:'Game Processing',    tx:20, ty:13, tw:5, th:2, roof:'#566069', wall:'#444e56' },
-    { key:'storage',    name:'Storage Lot',        tx:21, ty:17, tw:4, th:2, roof:'#b09a6e', wall:'#8a784f' },
-    { key:'owners',     name:"Owner's Lodge",      tx:28, ty:22, tw:5, th:3, roof:'#8a5630', wall:'#6f4424' },
-  ];
+  /* ---------- buildings from the map data ---------- */
+  const buildings = (MAP.buildings || []).map(bm => {
+    const d = (typeof BUILDING_DEFS !== 'undefined' && BUILDING_DEFS[bm.key]) || { name:bm.key, tw:3, th:2 };
+    return { key:bm.key, name:d.name, tw:d.tw, th:d.th, roof:d.roof, wall:d.wall, type:d.type, tx:bm.tx, ty:bm.ty };
+  });
+  const occupied = new Set();
   buildings.forEach(b => {
-    for(let j=b.ty;j<b.ty+b.th;j++) for(let i=b.tx;i<b.tx+b.tw;i++) if(inB(i,j)){ solid[j][i]=true; if(terrain[j][i]==='p') terrain[j][i]='g'; }
-    b.doorTx = b.tx + Math.floor(b.tw/2); b.doorTy = b.ty + b.th;     // door = tile just below
-    if(inB(b.doorTx,b.doorTy)){ terrain[b.doorTy][b.doorTx]='p'; solid[b.doorTy][b.doorTx]=false; }
+    for(let j=b.ty;j<b.ty+b.th;j++) for(let i=b.tx;i<b.tx+b.tw;i++) if(inB(i,j)){ solid[j][i]=true; if(terrain[j][i]==='b') terrain[j][i]='g'; occupied.add(i+','+j); }
+    b.doorTx = b.tx + Math.floor(b.tw/2); b.doorTy = b.ty + b.th;
+    if(inB(b.doorTx,b.doorTy)){ terrain[b.doorTy][b.doorTx]='p'; solid[b.doorTy][b.doorTx]=false; }   // door is always reachable
+    occupied.add(b.doorTx+','+b.doorTy);
     b.cx = (b.tx + b.tw/2)*TILE; b.cy = (b.ty + b.th)*TILE + 6;
   });
+  // drop any tree that sits under a building or in a doorway
+  for(let n=trees.length-1;n>=0;n--) if(occupied.has(trees[n].i+','+trees[n].j)) trees.splice(n,1);
 
-  // simple, clear walkways: a straight gravel path from every door to the driveway
-  buildings.forEach(b => {
-    if(b.key==='owners') tline([[b.doorTx,b.doorTy],[28,b.doorTy],[28,24]], 0, pave);
-    else tline([[b.doorTx,b.doorTy],[18,b.doorTy]], 0, pave);
-  });
-
-  // trees: standing timber up top & to the NE, leafy borders, light scatter
-  const trees = [];
-  function addTree(i,j){ if(inB(i,j) && terrain[j][i]==='g' && !solid[j][i]){ solid[j][i]=true; trees.push({x:i*TILE+TILE/2, y:j*TILE+TILE}); } }
-  function nearDoor(i,j){ return buildings.some(b=>Math.abs(i-b.doorTx)<=1 && Math.abs(j-b.doorTy)<=1); }
-  for(let j=0;j<MAP_H;j++) for(let i=0;i<MAP_W;i++){
-    if(nearDoor(i,j)) continue;
-    let timber = j<=1;                                          // tree line along the top
-    if(!timber && j>=2 && j<=17){ const rx=32+(j-2)/15*17; if(i>rx+1) timber=true; }   // timber NE of the road
-    if(timber) addTree(i,j);
-  }
-  for(let j=2;j<MAP_H;j++){ if(Math.random()<0.5) addTree(0,j); if(Math.random()<0.5) addTree(MAP_W-1,j); }    // sides
-  for(let i=0;i<MAP_W;i++){ if(Math.random()<0.55) addTree(i,MAP_H-1); }                                       // bottom
-  for(let j=8;j<MAP_H-1;j++) for(let i=1;i<MAP_W-1;i++){ if(Math.random()<0.03 && !nearDoor(i,j)) addTree(i,j); } // scatter
-
-  // grass flowers (decoration)
-  const flowers = [];
-  for(let k=0;k<80;k++){ const i=(Math.random()*MAP_W)|0, j=(2+Math.random()*(MAP_H-3))|0; if(terrain[j]&&terrain[j][i]==='g'&&!solid[j][i]) flowers.push({x:i*TILE+(4+(Math.random()*8|0)), y:j*TILE+(6+(Math.random()*7|0)), c:Math.random()<0.5?'#e85d6a':'#f2c14e'}); }
-
-  /* ---------- player (starts on the driveway, just south of the bridge) ---------- */
-  const player = { x:18.5*TILE, y:8.5*TILE, speed:74, frame:0, anim:0, moving:false };
+  /* ---------- player (from the map's start tile) ---------- */
+  const ps = MAP.player || { tx:Math.floor(MAP_W/2), ty:Math.floor(MAP_H/2) };
+  const player = { x:(ps.tx+0.5)*TILE, y:(ps.ty+0.5)*TILE, speed:74, frame:0, anim:0, moving:false };
 
   /* ---------- NPCs: a guide outside each building ---------- */
   const NPC_LINES = {
@@ -134,7 +101,7 @@
   const held = { up:false, down:false, left:false, right:false };
   const KEYMAP = { ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right', w:'up', s:'down', a:'left', d:'right', W:'up', S:'down', A:'left', D:'right' };
   let active = false;    // canvas is on screen
-  function modalOpen(){ const b=document.getElementById('backdrop'); return b && b.classList.contains('open'); }
+  function modalOpen(){ const b=document.getElementById('backdrop')||document.getElementById('gameFallback'); return !!(b && b.classList.contains('open')); }
 
   window.addEventListener('keydown', e => {
     if(!active || modalOpen()) return;
@@ -167,7 +134,30 @@
     if(b) openBuilding(b.key);
   });
 
-  function openBuilding(key){ if(typeof openModal==='function') openModal(key); }
+  function openBuilding(key){
+    if(typeof openModal === 'function'){ openModal(key); return; }   // home page uses app.js's modal
+    showInfoFallback(key);                                           // other pages (e.g. Hammer Camp) use a built-in popup
+  }
+  let fb = null;
+  function showInfoFallback(key){
+    if(typeof BUILDINGS === 'undefined' || !BUILDINGS[key]) return;
+    const b = BUILDINGS[key];
+    if(!fb){
+      fb = document.createElement('div'); fb.className='modal-backdrop'; fb.id='gameFallback';
+      fb.innerHTML = '<div class="modal"><div class="modal-head"><div><div class="tagline" id="fbTag"></div><h2 id="fbTitle"></h2></div><button class="close-btn" id="fbClose" aria-label="Close">&times;</button></div><div class="view-stage"><div class="view-pane active" id="fbImg"></div></div><div class="modal-body"><p class="moment-line" id="fbMoment"></p><p class="desc" id="fbDesc"></p><div class="feature-title">✦ What this building has</div><ul class="feature-list" id="fbFeat"></ul></div></div>';
+      document.body.appendChild(fb);
+      const close = () => { fb.classList.remove('open'); document.body.style.overflow=''; };
+      fb.addEventListener('click', e => { if(e.target===fb || e.target.id==='fbClose') close(); });
+      document.addEventListener('keydown', e => { if(e.key==='Escape') close(); });
+    }
+    fb.querySelector('#fbTitle').textContent = b.name;
+    fb.querySelector('#fbTag').textContent = b.tagline || '';
+    fb.querySelector('#fbImg').innerHTML = b.out || '';
+    const ml = fb.querySelector('#fbMoment'); if(b.peak){ ml.textContent='“'+b.peak+'”'; ml.style.display=''; } else ml.style.display='none';
+    fb.querySelector('#fbDesc').textContent = b.desc || '';
+    fb.querySelector('#fbFeat').innerHTML = (b.features||[]).map(f=>`<li>${f}</li>`).join('');
+    fb.classList.add('open'); document.body.style.overflow='hidden';
+  }
   let nearBuilding = null;
   function enter(){ if(nearBuilding) openBuilding(nearBuilding.key); }
 

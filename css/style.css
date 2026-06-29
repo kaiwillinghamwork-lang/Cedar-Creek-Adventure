@@ -745,6 +745,8 @@
 .camp-sum-total span{color:var(--cedar-light);font-weight:700;}
 .camp-sum-total b{color:var(--gold);font-size:1.4rem;}
 .camp-sum-note{color:#9fb3a3;font-size:.82rem;margin-top:12px;line-height:1.5;}
+.camp-request-btn{width:100%;justify-content:center;margin-top:14px;}
+.bk-done-note{color:#7a7066;font-size:.82rem;margin-top:12px;text-align:center;}
 @media(max-width:560px){ .camp-hero-logo{width:120px;height:120px;} }
 
 /* ===== walkable overworld game (home page map) ===== */
@@ -786,6 +788,44 @@
 .game-bubble::after{content:"";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);border:6px solid transparent;border-top-color:#2c3e2c;}
 .game-bubble::before{content:"";position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border:5px solid transparent;border-top-color:#fff;z-index:1;}
 .bubble-go{display:block;margin-top:5px;color:#3f6b4a;font-weight:800;font-size:.74rem;}
+
+/* ===== footer contact line ===== */
+.footer-contact{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin:10px 0 4px;}
+.footer-contact a{color:var(--cedar-light);text-decoration:none;font-weight:700;font-size:.9rem;}
+.footer-contact a:hover{color:#fff;}
+
+/* ===== contact page ===== */
+.contact-hero{
+  text-align:center;color:var(--sand);padding:54px 22px 50px;
+  background:radial-gradient(ellipse at 50% -10%, rgba(200,146,43,0.22), transparent 60%),
+    linear-gradient(180deg,#142a1d 0%, #1f3d2b 60%, #2c5238 100%);
+}
+.contact-hero .kicker{text-transform:uppercase;letter-spacing:4px;font-size:.76rem;color:var(--cedar-light);margin-bottom:10px;}
+.contact-hero h1{font-size:clamp(1.9rem,4.5vw,2.9rem);font-weight:800;max-width:680px;margin:0 auto;}
+.contact-hero p{max-width:560px;margin:14px auto 0;color:#dfeadf;font-size:1.05rem;}
+.contact-wrap{
+  max-width:1000px;margin:0 auto;padding:40px 20px 70px;
+  display:grid;grid-template-columns:1fr 1.4fr;gap:26px;align-items:start;
+}
+.contact-info{background:var(--forest-deep);color:var(--sand);border-radius:18px;padding:26px 24px;box-shadow:0 16px 40px rgba(0,0,0,.34);}
+.contact-info h2{color:var(--cedar-light);font-size:1.25rem;margin-bottom:16px;}
+.contact-line{display:block;color:#e7efe6;text-decoration:none;font-size:1.02rem;font-weight:600;margin-bottom:14px;line-height:1.5;}
+a.contact-line:hover{color:var(--cedar-light);}
+.contact-note{color:#bcd0c0;font-size:.9rem;line-height:1.6;font-weight:400;margin-top:18px;border-top:1px solid rgba(255,255,255,.12);padding-top:16px;}
+.contact-form{background:var(--cream);border-radius:18px;padding:26px 26px 28px;box-shadow:0 16px 40px rgba(0,0,0,.3);}
+.contact-form h2{color:var(--forest);font-size:1.3rem;margin-bottom:16px;}
+.contact-form label{display:block;font-size:.8rem;font-weight:700;color:#5c5347;text-transform:uppercase;letter-spacing:.5px;margin:0 0 6px;}
+.contact-form label .opt{text-transform:none;letter-spacing:0;color:var(--muted);font-weight:600;}
+.contact-form input,.contact-form select,.contact-form textarea{
+  width:100%;font:inherit;padding:12px 14px;border:1.5px solid #d8cdb6;border-radius:10px;background:#fff;margin-bottom:16px;color:var(--ink);
+}
+.contact-form textarea{resize:vertical;}
+.contact-form input:focus,.contact-form select:focus,.contact-form textarea:focus{outline:none;border-color:var(--cedar);box-shadow:0 0 0 3px rgba(179,133,90,.22);}
+.contact-form .btn{width:100%;justify-content:center;}
+.contact-status{margin-top:14px;padding:11px 14px;border-radius:10px;font-size:.92rem;font-weight:600;text-align:center;}
+.contact-status.ok{background:#e8f5ec;color:#2e7d46;}
+.contact-status.err{background:#fdecea;color:#b5462e;}
+@media(max-width:760px){ .contact-wrap{grid-template-columns:1fr;} }
 
 .bk-submit{margin-top:24px;width:100%;justify-content:center;}
 .bk-error{margin-top:12px;color:#b5462e;font-weight:600;font-size:.92rem;}

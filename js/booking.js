@@ -530,4 +530,21 @@ document.getElementById('bkEdit').addEventListener('click', () => {
   document.getElementById('book').scrollIntoView({ behavior:'smooth', block:'start' });
 });
 
+/* ---- send the request to Cedar Creek (email / Formspree via site.js) ---- */
+function buildTripText(){
+  const t = computeTotals();
+  const L = ['Booking request — Cedar Creek Hunt & Adventure Basecamp', ''];
+  L.push(`Guests: ${guests}`);
+  if(bkIn.value && bkOut.value) L.push(`Dates: ${prettyDate(bkIn.value)} – ${prettyDate(bkOut.value)} (${t.nights} night${t.nights>1?'s':''})`);
+  if(t.lodgings.length) L.push('Lodging: ' + t.lodgings.map(x=>`${x.qty}× ${x.l.name}`).join(', '));
+  if(t.acts.length) L.push('Activities: ' + t.acts.map(a=>`${a.name}${a.optionLabel?` (${a.optionLabel})`:''}${a.day?` on ${prettyDate(a.day)}${a.time?` at ${fmtTime(a.time)}`:''}`:''}`).join('; '));
+  L.push('', `Estimated total (incl. ${(TAX_RATE*100).toFixed(1)}% tax): ${money(t.total)}`, '',
+         '— Please confirm dates & pricing. —', '', 'My name: ', 'Best phone or email to reach me: ');
+  return L.join('\n');
+}
+const bkEmail = document.getElementById('bkEmail');
+if(bkEmail) bkEmail.addEventListener('click', () => {
+  if(window.ccInquiry) window.ccInquiry('Cedar Creek booking request', buildTripText());
+});
+
 updateSummary();
