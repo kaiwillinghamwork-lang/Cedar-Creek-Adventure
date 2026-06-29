@@ -221,7 +221,7 @@ const ACTIVITIES = [
     season:[[9,1],[12,31]]
   },
   {
-    key:"flyfish", icon:"🪰", options:[{label:"Half-day",price:450},{label:"Full-day",price:650}],
+    key:"flyfish", icon:"🪰", options:[{label:"1–2 hours",price:200},{label:"3–4 hours",price:400},{label:"All day",price:650}],
     name:"Spokane River Fly-Fishing",
     short:"Native redband trout",
     tagline:"Catch & release · selective gear",
@@ -287,7 +287,7 @@ const ACTIVITIES = [
     season:[[5,1],[10,15]]
   },
   {
-    key:"atvrental", icon:"🏍️", options:[{label:"Half-day",price:200},{label:"Full-day",price:325}],
+    key:"atvrental", icon:"🏍️", options:[{label:"2-Hour Rental",price:120},{label:"All-Day Rental",price:325}],
     name:"4-Wheeler (ATV) Rental",
     short:"Self-guided trail riding",
     tagline:"Rent & ride · spring–fall",
@@ -308,7 +308,7 @@ const ACTIVITIES = [
     season:[[4,1],[11,15]]
   },
   {
-    key:"snowmobilerental", icon:"🛷", options:[{label:"Half-day",price:225},{label:"Full-day",price:350}],
+    key:"snowmobilerental", icon:"🛷", options:[{label:"2-Hour Rental",price:130},{label:"All-Day Rental",price:350}],
     name:"Snowmobile Rental",
     short:"Self-guided winter sledding",
     tagline:"Rent & ride · deep winter",

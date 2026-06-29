@@ -3,9 +3,10 @@
 /*   1. pick dates with the calendar (calendar.js → #bkIn/#bkOut)*/
 /*   2. choose lodging — Mini Cabin (opens the cabin modal with  */
 /*      a Confirm button) or RV Rental Spot                      */
-/*   3. choose activities (or "just the stay")                   */
+/*   3. choose activities — click one to open a popup and pick   */
+/*      an option; out-of-season activities are grayed out       */
 /*   On finish: a thank-you panel + an "Add to Google Calendar"  */
-/*   link pre-filled with the trip.                              */
+/*   link, with a priced subtotal, tax, and total.              */
 /*   Reads BUILDINGS + ACTIVITIES from data.js.                  */
 /* ============================================================ */
 
@@ -31,6 +32,17 @@ const bkDone     = document.getElementById('bkDone');
 const bkDoneSum  = document.getElementById('bkDoneSummary');
 const bkGcal     = document.getElementById('bkGcal');
 
+/* activity-options popup */
+const actOptBackdrop = document.getElementById('actOptBackdrop');
+const actOptTitle    = document.getElementById('actOptTitle');
+const actOptTagline  = document.getElementById('actOptTagline');
+const actOptDesc     = document.getElementById('actOptDesc');
+const actOptList     = document.getElementById('actOptList');
+
+/* ---- selection state ---- */
+let chosen = {};       // { activityKey: optionIndex }
+let justStay = false;  // "no activities — just the stay"
+
 /* ---- helpers ---- */
 function nightsBetween(a,b){
   if(!a || !b) return 0;
@@ -41,6 +53,12 @@ function prettyDate(iso){
   if(!iso) return '';
   return new Date(iso+'T00:00:00').toLocaleDateString(undefined,{ month:'short', day:'numeric', year:'numeric' });
 }
+function money(n){ return '$' + Math.round(n).toLocaleString(); }
+function activityOption(a, idx){
+  if(a.options && a.options.length) return a.options[idx] || a.options[0];
+  return { label:'', price:a.price || 0 };
+}
+
 /* ---- is an activity available during the selected stay? ---- */
 function dayInSeason(md, season){
   const s = season[0][0]*100 + season[0][1];
@@ -48,30 +66,26 @@ function dayInSeason(md, season){
   return s <= e ? (md >= s && md <= e) : (md >= s || md <= e);   // handles seasons that wrap the new year
 }
 function activityInSeasonForStay(a, startISO, endISO){
-  if(!a.season) return true;                 // no season set → always available
+  if(!a.season) return true;
   if(!startISO || !endISO) return true;      // no dates chosen yet → don't restrict
   const start = new Date(startISO+'T00:00:00'), end = new Date(endISO+'T00:00:00');
   for(let d = new Date(start), i = 0; d < end && i < 366; d.setDate(d.getDate()+1), i++){
-    if(dayInSeason((d.getMonth()+1)*100 + d.getDate(), a.season)) return true;   // any day of the stay counts
+    if(dayInSeason((d.getMonth()+1)*100 + d.getDate(), a.season)) return true;
   }
   return false;
 }
+
 function selectedLodging(){
   const r = bkForm.querySelector('input[name="lodging"]:checked');
   return r ? LODGING.find(l => l.key === r.value) : null;
 }
 function selectedActivities(){
-  if(bkForm.querySelector('input[name="noact"]:checked')) return [];
-  return [...bkForm.querySelectorAll('input[name="act"]:checked')].map(c => {
-    const a = ACTIVITIES.find(x => x.key === c.value);
+  if(justStay) return [];
+  return Object.keys(chosen).map(key => {
+    const a = ACTIVITIES.find(x => x.key === key);
     if(!a) return null;
-    let price = a.price || 0, optionLabel = '';
-    if(a.options && a.options.length){
-      const sel = bkForm.querySelector(`.bk-act-opt[data-key="${a.key}"]`);
-      const o = a.options[sel ? +sel.value : 0] || a.options[0];
-      price = o.price; optionLabel = o.label;
-    }
-    return { key:a.key, name:a.name, icon:a.icon, price, optionLabel };
+    const o = activityOption(a, chosen[key]);
+    return { key, name:a.name, icon:a.icon, price:o.price, optionLabel:o.label };
   }).filter(Boolean);
 }
 
@@ -96,17 +110,25 @@ bkLodging.innerHTML = LODGING.map(l => {
   </label>`;
 }).join('');
 
-/* ---- render activity checkboxes (+ "just the stay") ---- */
-bkActsWrap.innerHTML =
-  ACTIVITIES.map(a => {
-    const right = (a.options && a.options.length)
-      ? `<select class="bk-act-opt" data-key="${a.key}" aria-label="${a.name} option">`
-          + a.options.map((o,i) => `<option value="${i}">${o.label} — $${o.price.toLocaleString()}</option>`).join('')
-        + `</select>`
-      : `<span class="bk-act-price">$${(a.price||0).toLocaleString()}</span>`;
+/* ============ ACTIVITIES (click to open the options popup) ============ */
+function renderActivities(){
+  // drop anything that's now out of season for the chosen dates
+  Object.keys(chosen).forEach(key => {
+    const a = ACTIVITIES.find(x => x.key === key);
+    if(a && !activityInSeasonForStay(a, bkIn.value, bkOut.value)) delete chosen[key];
+  });
+
+  const cards = ACTIVITIES.map(a => {
+    const ok = activityInSeasonForStay(a, bkIn.value, bkOut.value);
+    const isChosen = Object.prototype.hasOwnProperty.call(chosen, a.key);
+    const opt = isChosen ? activityOption(a, chosen[a.key]) : null;
+    let right;
+    if(!ok)            right = `<span class="bk-act-season">Out of season</span>`;
+    else if(isChosen)  right = `<span class="bk-act-chosen">${opt.label?opt.label+' · ':''}${money(opt.price)}</span>`
+                             + `<button type="button" class="bk-act-remove" data-remove="${a.key}" aria-label="Remove ${a.name}">✕</button>`;
+    else               right = `<span class="bk-act-cta">Choose →</span>`;
     return `
-    <label class="bk-act">
-      <input type="checkbox" name="act" value="${a.key}">
+    <div class="bk-pick${isChosen?' chosen':''}${ok?'':' out-of-season'}" ${ok?`data-key="${a.key}" role="button" tabindex="0"`:'aria-disabled="true"'}>
       <span class="bk-act-card">
         <span class="bk-act-icon">${a.icon}</span>
         <span class="bk-act-main">
@@ -115,55 +137,69 @@ bkActsWrap.innerHTML =
         </span>
         ${right}
       </span>
-    </label>`;
-  }).join('') + `
-    <label class="bk-act bk-act-none">
-      <input type="checkbox" name="noact" value="none">
+    </div>`;
+  }).join('');
+
+  const none = `
+    <div class="bk-pick bk-pick-none${justStay?' chosen':''}" data-none="1" role="button" tabindex="0">
       <span class="bk-act-card">
         <span class="bk-act-icon">🌲</span>
         <span class="bk-act-main">
           <span class="bk-act-name">No activities — just the stay</span>
           <span class="bk-act-short">Relax and take it as it comes</span>
         </span>
+        ${justStay?'<span class="bk-act-chosen">Selected</span>':'<span class="bk-act-cta">Choose →</span>'}
       </span>
-    </label>`;
+    </div>`;
 
-const noActBox = bkForm.querySelector('input[name="noact"]');
-bkActsWrap.addEventListener('change', e => {
-  if(e.target.name === 'noact' && e.target.checked)
-    bkForm.querySelectorAll('input[name="act"]').forEach(c => c.checked = false);
-  if(e.target.name === 'act' && e.target.checked) noActBox.checked = false;
-  updateSummary();
-});
-// option dropdowns shouldn't toggle the activity checkbox when clicked
-bkActsWrap.querySelectorAll('.bk-act-opt').forEach(sel =>
-  sel.addEventListener('click', e => e.stopPropagation()));
-
-/* gray out (and unselect) activities that are out of season for the chosen dates */
-function refreshActivitySeasons(){
-  bkForm.querySelectorAll('input[name="act"]').forEach(cb => {
-    const a = ACTIVITIES.find(x => x.key === cb.value);
-    if(!a) return;
-    const ok = activityInSeasonForStay(a, bkIn.value, bkOut.value);
-    const label = cb.closest('.bk-act');
-    label.classList.toggle('out-of-season', !ok);
-    cb.disabled = !ok;
-    const sel = label.querySelector('.bk-act-opt');
-    if(sel) sel.disabled = !ok;
-    let badge = label.querySelector('.bk-act-season');
-    if(!ok){
-      if(cb.checked) cb.checked = false;     // drop it from the trip if dates moved out of season
-      if(!badge){
-        badge = document.createElement('span');
-        badge.className = 'bk-act-season';
-        badge.textContent = 'Out of season';
-        label.querySelector('.bk-act-main').appendChild(badge);
-      }
-    } else if(badge){
-      badge.remove();
-    }
-  });
+  bkActsWrap.innerHTML = cards + none;
 }
+
+bkActsWrap.addEventListener('click', e => {
+  const remove = e.target.closest('[data-remove]');
+  if(remove){ delete chosen[remove.dataset.remove]; renderActivities(); updateSummary(); return; }
+  const none = e.target.closest('[data-none]');
+  if(none){ justStay = !justStay; if(justStay) chosen = {}; renderActivities(); updateSummary(); return; }
+  const card = e.target.closest('.bk-pick[data-key]');
+  if(card) openActivityOptions(card.dataset.key);
+});
+bkActsWrap.addEventListener('keydown', e => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const card = e.target.closest('.bk-pick[data-key], [data-none]');
+  if(card){ e.preventDefault(); card.click(); }
+});
+
+/* ---- the options popup ---- */
+function openActivityOptions(key){
+  const a = ACTIVITIES.find(x => x.key === key);
+  if(!a) return;
+  actOptTitle.textContent = a.name;
+  actOptTagline.textContent = a.tagline || '';
+  actOptDesc.textContent = a.short || '';
+  const opts = (a.options && a.options.length) ? a.options : [{ label:'Book this trip', price:a.price || 0 }];
+  actOptList.innerHTML = opts.map((o,i) => `
+      <button type="button" class="act-opt-choice${chosen[key]===i?' current':''}" data-key="${key}" data-idx="${i}">
+        <span class="act-opt-label">${o.label}${chosen[key]===i?' <small>✓ selected</small>':''}</span>
+        <span class="act-opt-price">${money(o.price)}</span>
+      </button>`).join('')
+    + (Object.prototype.hasOwnProperty.call(chosen, key)
+        ? `<button type="button" class="act-opt-remove" data-remove="${key}">Remove from trip</button>` : '');
+  actOptBackdrop.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeActivityOptions(){
+  actOptBackdrop.classList.remove('open');
+  document.body.style.overflow = '';
+}
+actOptList.addEventListener('click', e => {
+  const choice = e.target.closest('.act-opt-choice');
+  if(choice){ chosen[choice.dataset.key] = +choice.dataset.idx; justStay = false; closeActivityOptions(); renderActivities(); updateSummary(); return; }
+  const rem = e.target.closest('.act-opt-remove');
+  if(rem){ delete chosen[rem.dataset.remove]; closeActivityOptions(); renderActivities(); updateSummary(); }
+});
+document.getElementById('actOptClose').addEventListener('click', closeActivityOptions);
+actOptBackdrop.addEventListener('click', e => { if(e.target === actOptBackdrop) closeActivityOptions(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeActivityOptions(); });
 
 /* ============ MINI CABIN → building modal with Confirm ============ */
 const cabinBackdrop = document.getElementById('backdrop');
@@ -203,7 +239,6 @@ if(cabinBackdrop){
   document.getElementById('closeBtn').addEventListener('click', closeCabinModal);
   cabinBackdrop.addEventListener('click', e => { if(e.target===cabinBackdrop) closeCabinModal(); });
   document.addEventListener('keydown', e => { if(e.key==='Escape') closeCabinModal(); });
-  // Confirm = choose the Mini Cabin
   document.getElementById('cabinConfirm').addEventListener('click', () => {
     const radio = bkForm.querySelector('input[name="lodging"][value="cabin"]');
     radio.checked = true;
@@ -211,13 +246,12 @@ if(cabinBackdrop){
     updateSummary();
   });
 }
-// clicking the Mini Cabin option opens the modal instead of selecting directly
 bkLodging.addEventListener('click', e => {
   const opt = e.target.closest('.bk-opt[data-modal]');
   if(opt){ e.preventDefault(); openCabinModal(); }
 });
 
-/* ---- summary ---- */
+/* ---- summary + totals ---- */
 function updateNightsHint(){
   const nights = nightsBetween(bkIn.value, bkOut.value);
   if(bkIn.value && bkOut.value){
@@ -228,7 +262,6 @@ function updateNightsHint(){
     bkNights.textContent = 'Pick your dates above to see how many nights you’ll stay.';
   }
 }
-function money(n){ return '$' + Math.round(n).toLocaleString(); }
 function computeTotals(){
   const nights = nightsBetween(bkIn.value, bkOut.value);
   const lodge  = selectedLodging();
@@ -237,11 +270,10 @@ function computeTotals(){
   const activitiesTotal = acts.reduce((s,a) => s + (a.price || 0), 0);
   const subtotal = lodgingTotal + activitiesTotal;
   const tax = subtotal * TAX_RATE;
-  return { nights, lodge, acts, lodgingTotal, activitiesTotal, subtotal, tax, total: subtotal + tax };
+  return { nights, lodge, acts, lodgingTotal, subtotal, tax, total: subtotal + tax };
 }
 function buildSummaryHTML(){
   const t = computeTotals();
-  const justStay = !!noActBox.checked;
   const rows = [];
   if(bkIn.value && bkOut.value && t.nights > 0){
     rows.push(`<div class="bk-srow"><span>Dates</span><b>${prettyDate(bkIn.value)} – ${prettyDate(bkOut.value)}</b></div>`);
@@ -265,7 +297,7 @@ function buildSummaryHTML(){
 }
 function updateSummary(){
   updateNightsHint();
-  refreshActivitySeasons();
+  renderActivities();
   bkSummary.innerHTML = buildSummaryHTML();
 }
 bkForm.addEventListener('change', updateSummary);
@@ -305,7 +337,7 @@ bkForm.addEventListener('submit', e => {
   if(nights < 1){ showError('Your check-out date needs to be after your check-in date.'); return; }
   if(!lodge){ showError('Please choose where you’ll stay.'); return; }
 
-  const trip = { in:bkIn.value, out:bkOut.value, nights, lodge, acts:selectedActivities() };
+  const trip = { in:bkIn.value, out:bkOut.value };
   bkDoneSum.innerHTML = buildSummaryHTML();
   bkGcal.href = gcalUrl(trip);
   bkForm.parentElement.hidden = true;
