@@ -41,6 +41,21 @@ function prettyDate(iso){
   if(!iso) return '';
   return new Date(iso+'T00:00:00').toLocaleDateString(undefined,{ month:'short', day:'numeric', year:'numeric' });
 }
+/* ---- is an activity available during the selected stay? ---- */
+function dayInSeason(md, season){
+  const s = season[0][0]*100 + season[0][1];
+  const e = season[1][0]*100 + season[1][1];
+  return s <= e ? (md >= s && md <= e) : (md >= s || md <= e);   // handles seasons that wrap the new year
+}
+function activityInSeasonForStay(a, startISO, endISO){
+  if(!a.season) return true;                 // no season set → always available
+  if(!startISO || !endISO) return true;      // no dates chosen yet → don't restrict
+  const start = new Date(startISO+'T00:00:00'), end = new Date(endISO+'T00:00:00');
+  for(let d = new Date(start), i = 0; d < end && i < 366; d.setDate(d.getDate()+1), i++){
+    if(dayInSeason((d.getMonth()+1)*100 + d.getDate(), a.season)) return true;   // any day of the stay counts
+  }
+  return false;
+}
 function selectedLodging(){
   const r = bkForm.querySelector('input[name="lodging"]:checked');
   return r ? LODGING.find(l => l.key === r.value) : null;
@@ -123,6 +138,32 @@ bkActsWrap.addEventListener('change', e => {
 // option dropdowns shouldn't toggle the activity checkbox when clicked
 bkActsWrap.querySelectorAll('.bk-act-opt').forEach(sel =>
   sel.addEventListener('click', e => e.stopPropagation()));
+
+/* gray out (and unselect) activities that are out of season for the chosen dates */
+function refreshActivitySeasons(){
+  bkForm.querySelectorAll('input[name="act"]').forEach(cb => {
+    const a = ACTIVITIES.find(x => x.key === cb.value);
+    if(!a) return;
+    const ok = activityInSeasonForStay(a, bkIn.value, bkOut.value);
+    const label = cb.closest('.bk-act');
+    label.classList.toggle('out-of-season', !ok);
+    cb.disabled = !ok;
+    const sel = label.querySelector('.bk-act-opt');
+    if(sel) sel.disabled = !ok;
+    let badge = label.querySelector('.bk-act-season');
+    if(!ok){
+      if(cb.checked) cb.checked = false;     // drop it from the trip if dates moved out of season
+      if(!badge){
+        badge = document.createElement('span');
+        badge.className = 'bk-act-season';
+        badge.textContent = 'Out of season';
+        label.querySelector('.bk-act-main').appendChild(badge);
+      }
+    } else if(badge){
+      badge.remove();
+    }
+  });
+}
 
 /* ============ MINI CABIN → building modal with Confirm ============ */
 const cabinBackdrop = document.getElementById('backdrop');
@@ -224,6 +265,7 @@ function buildSummaryHTML(){
 }
 function updateSummary(){
   updateNightsHint();
+  refreshActivitySeasons();
   bkSummary.innerHTML = buildSummaryHTML();
 }
 bkForm.addEventListener('change', updateSummary);

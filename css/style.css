@@ -514,6 +514,21 @@
 .bk-act-none .bk-act-card{border-style:dashed;}
 .bk-act-none .bk-act-price{display:none;}
 
+/* out-of-season activities: grayed out and not selectable */
+.bk-act.out-of-season{cursor:not-allowed;}
+.bk-act.out-of-season .bk-act-card{
+  background:#f0ede6;border-color:#e2d8c2;border-style:dashed;
+  filter:grayscale(1);opacity:.6;
+}
+.bk-act.out-of-season:hover .bk-act-card{transform:none;border-color:#e2d8c2;}
+.bk-act.out-of-season .bk-act-opt,
+.bk-act.out-of-season .bk-act-price{opacity:.7;}
+.bk-act-season{
+  display:inline-block;margin-top:5px;padding:2px 9px;border-radius:999px;
+  font-size:.68rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
+  color:#9a5a2c;background:rgba(154,90,44,.14);border:1px solid rgba(154,90,44,.35);
+}
+
 .bk-submit{margin-top:24px;width:100%;justify-content:center;}
 .bk-error{margin-top:12px;color:#b5462e;font-weight:600;font-size:.92rem;}
 
