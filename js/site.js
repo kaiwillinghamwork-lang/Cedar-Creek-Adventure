@@ -30,6 +30,15 @@ window.ccInquiry = function(subject, body, replyEmail){
   return Promise.resolve(true);
 };
 
+/* load the brand typefaces once (Fraunces display + Inter body) */
+(function(){
+  if(document.getElementById('cc-fonts')) return;
+  const l = document.createElement('link');
+  l.id = 'cc-fonts'; l.rel = 'stylesheet';
+  l.href = 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap';
+  document.head.appendChild(l);
+})();
+
 function renderSiteChrome(){
   const page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const hasSideMenu = !!document.getElementById('sideMenu');   // only true on the home page
@@ -42,10 +51,9 @@ function renderSiteChrome(){
 
   const links = [
     { label:'Home',        href:'index.html' },
-    { label:'About Us',    href:'about.html' },
+    { label:'About',       href:'about.html' },
     { label:'Explore',     href:'explore.html' },
     { label:'Hammer Camp', href:'hammer-camp.html' },
-    { label:'Contact',     href:'contact.html' },
   ];
 
   function navLinkHTML(l){
@@ -79,23 +87,32 @@ function renderSiteChrome(){
 
   const footerHTML = `
   <footer class="site-footer">
-    <img src="images/logo.jpg" alt="" class="footer-logo">
-    <p><b>Cedar Creek Hunt &amp; Adventure Basecamp</b></p>
-    <p>3928 Cedar Creek Rd · Colville, WA · 28 acres on East Fork Cedar Creek</p>
-    <p class="footer-contact">
-      <a href="mailto:${CONTACT.email}">✉️ ${CONTACT.email}</a>
-      <a href="tel:${CONTACT.phone.replace(/[^0-9+]/g,'')}">📞 ${CONTACT.phone}</a>
-    </p>
-    <nav class="footer-links">
-      <a href="index.html">Home</a><a href="about.html">About Us</a><a href="explore.html">Explore</a><a href="hammer-camp.html">Hammer Camp</a><a href="schedule.html">Plan a Stay</a><a href="contact.html">Contact</a><a href="login.html">Log in</a>
-    </nav>
-    <p class="footer-fine">We don't rent beds — we sell the days you'll remember. · Concept renderings, not to scale.</p>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="images/logo.jpg" alt="" class="footer-logo">
+        <div>
+          <p class="footer-name">Cedar Creek Hunt &amp; Adventure Basecamp</p>
+          <p class="footer-addr">3928 Cedar Creek Rd · Colville, WA · 28 acres on East Fork Cedar Creek</p>
+        </div>
+      </div>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="index.html">Home</a><a href="about.html">About</a><a href="explore.html">Explore</a><a href="hammer-camp.html">Hammer Camp</a><a href="schedule.html">Plan a Stay</a>
+      </nav>
+      <div class="footer-reach">
+        <a href="mailto:${CONTACT.email}">${CONTACT.email}</a>
+        <a href="tel:${CONTACT.phone.replace(/[^0-9+]/g,'')}">${CONTACT.phone}</a>
+      </div>
+    </div>
+    <p class="footer-copy">© Cedar Creek Hunt &amp; Adventure Basecamp · Colville, Washington</p>
   </footer>`;
 
   const h = document.getElementById('siteHeader');
   if(h) h.innerHTML = headerHTML;
   const f = document.getElementById('siteFooter');
   if(f) f.innerHTML = footerHTML;
+
+  const vr = document.getElementById('visitReach');   // "Find us" contact links (home page)
+  if(vr) vr.innerHTML = `<a href="mailto:${CONTACT.email}">${CONTACT.email}</a><a href="tel:${CONTACT.phone.replace(/[^0-9+]/g,'')}">${CONTACT.phone}</a>`;
 }
 window.renderSiteChrome = renderSiteChrome;
 renderSiteChrome();

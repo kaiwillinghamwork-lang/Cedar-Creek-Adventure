@@ -1064,3 +1064,83 @@ a.contact-line:hover{color:var(--cedar-light);}
 .signed-in{text-align:center;padding:10px 0 6px;}
 .signed-in .who{font-size:1.25rem;font-weight:800;color:var(--forest);}
 .signed-in .email{color:var(--muted);font-size:.9rem;margin:2px 0 18px;}
+
+/* ============================================================ */
+/* =====================  FRESH LOOK  ========================= */
+/* ============================================================ */
+:root{
+  --forest:#22352a; --forest-deep:#14201a; --moss:#3d6a4a;
+  --cedar:#c07a3c; --cedar-light:#e0a972; --sand:#f5efe4; --cream:#fbf8f2;
+  --ink:#1d231f; --muted:#6f6a60; --gold:#c98a3a; --page:#f4efe6; --line:#e7ddcd;
+}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--ink);}
+h1,h2,h3,.brand-text,.hero h1,.section-head h2,.browse h2,.camp-hero h1,.about-hero h1,
+.camp-card-head h2,.bk-done-card h3,.auth-top h1{font-family:'Fraunces','Georgia',serif;letter-spacing:-.01em;font-weight:600;}
+
+/* nav */
+.topnav{background:rgba(20,32,26,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:13px 26px;border-bottom:1px solid rgba(255,255,255,.06);box-shadow:none;}
+.brand-text{font-size:1.1rem;font-weight:600;}
+.brand-text small{letter-spacing:1.3px;}
+.nav-links{gap:2px;}
+.nav-links a,.nav-links button{font-weight:500;font-size:.92rem;color:#e7eee6;border-radius:8px;}
+.nav-links a:hover,.nav-links button:hover{background:rgba(255,255,255,.08);}
+.nav-links .nav-cta{background:var(--cedar);color:#1a1109;font-weight:600;padding:10px 18px;border-radius:999px;}
+.nav-links .nav-cta:hover{background:var(--cedar-light);color:#1a1109;}
+.nav-login,.nav-account{border:1px solid rgba(255,255,255,.22);}
+
+/* buttons */
+.btn{border-radius:999px;font-weight:600;letter-spacing:.2px;padding:13px 26px;font-family:inherit;}
+.btn-primary{background:var(--cedar);color:#1a1109;box-shadow:0 10px 24px rgba(192,122,60,.28);}
+.btn-primary:hover{background:var(--cedar-light);color:#1a1109;}
+.btn-ghost{background:transparent;border:1.5px solid rgba(255,255,255,.4);color:var(--sand);}
+
+/* hero — a real photo of the property */
+.hero{
+  min-height:78vh;align-items:flex-start;justify-content:flex-end;text-align:left;
+  padding:64px clamp(24px,7vw,90px) clamp(54px,8vh,90px);
+  background:
+    linear-gradient(180deg, rgba(15,24,18,.28) 0%, rgba(15,24,18,.5) 55%, rgba(15,24,18,.88) 100%),
+    url('images/about-property.jpg');
+  background-size:cover; background-position:center 36%;
+}
+.hero-trees{display:none;}
+.hero .kicker{color:var(--cedar-light);letter-spacing:3px;position:relative;}
+.hero h1{font-size:clamp(2.4rem,6vw,4.6rem);line-height:1.03;max-width:15ch;text-shadow:0 2px 30px rgba(0,0,0,.45);}
+.hero .sub{max-width:52ch;color:#eef3ec;}
+.hero .meta,.hero-cta{justify-content:flex-start;}
+.hero .chip{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);}
+.scroll-hint{align-self:center;}
+
+/* sections & cards */
+.browse{background:var(--page);}
+.section-head p,.browse .lead{color:var(--muted);}
+.card{border-radius:16px;box-shadow:0 2px 18px rgba(30,35,31,.08);border:1px solid var(--line);}
+.card:hover{box-shadow:0 18px 40px rgba(30,35,31,.16);}
+.page-bg{background:var(--page);}
+
+/* footer */
+.site-footer{background:var(--forest-deep);color:#b9c7bb;text-align:left;padding:46px clamp(22px,6vw,70px) 28px;}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;gap:28px;justify-content:space-between;align-items:flex-start;}
+.footer-brand{display:flex;gap:14px;align-items:center;max-width:430px;}
+.footer-logo{width:54px;height:54px;margin:0;}
+.footer-name{font-family:'Fraunces',serif;color:var(--sand);font-size:1.05rem;font-weight:600;}
+.footer-addr{font-size:.85rem;color:#9fb0a2;margin-top:3px;}
+.footer-links{display:flex;flex-direction:column;gap:9px;margin:0;}
+.footer-links a{color:#cdd8cd;font-weight:500;font-size:.92rem;text-decoration:none;}
+.footer-links a:hover{color:var(--cedar-light);}
+.footer-reach{display:flex;flex-direction:column;gap:8px;}
+.footer-reach a{color:var(--cedar-light);font-weight:600;font-size:.95rem;text-decoration:none;}
+.footer-copy{max-width:1100px;margin:26px auto 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.08);font-size:.8rem;color:#7f9184;}
+@media(max-width:640px){ .footer-inner{flex-direction:column;gap:22px;} }
+
+/* Visit Us / Google map */
+.visit{background:var(--forest);color:var(--sand);padding:clamp(48px,7vw,80px) 22px;}
+.visit-inner{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1fr 1.3fr;gap:34px;align-items:center;}
+.visit .kicker{text-transform:uppercase;letter-spacing:3px;font-size:.74rem;color:var(--cedar-light);margin-bottom:8px;}
+.visit h2{font-size:clamp(1.7rem,3.4vw,2.5rem);margin-bottom:14px;}
+.visit p{color:#d7e3d9;line-height:1.7;margin-bottom:8px;}
+.visit-reach{margin-top:18px;display:flex;flex-direction:column;gap:8px;}
+.visit-reach a{color:var(--cedar-light);font-weight:600;text-decoration:none;font-size:1.05rem;}
+.visit-map{border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);aspect-ratio:16/10;}
+.visit-map iframe{width:100%;height:100%;border:0;display:block;}
+@media(max-width:760px){ .visit-inner{grid-template-columns:1fr;} }
