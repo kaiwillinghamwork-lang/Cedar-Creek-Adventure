@@ -55,7 +55,12 @@ const actOptBackdrop = document.getElementById('actOptBackdrop');
 const actOptTitle    = document.getElementById('actOptTitle');
 const actOptTagline  = document.getElementById('actOptTagline');
 const actOptDesc     = document.getElementById('actOptDesc');
-const actOptList     = document.getElementById('actOptList');
+const actOptStage    = document.getElementById('actOptStage');
+const actOptStageTitle = document.getElementById('actOptStageTitle');
+const actOptFoot     = document.getElementById('actOptFoot');
+const actOptHint     = document.getElementById('actOptHint');
+const actOptConfirm  = document.getElementById('actOptConfirm');
+const actOptBack     = document.getElementById('actOptBack');
 
 /* ---- selection state ---- */
 let chosen = {};       // { activityKey: optionIndex }
@@ -108,9 +113,30 @@ function selectedActivities(){
   return Object.keys(chosen).map(key => {
     const a = ACTIVITIES.find(x => x.key === key);
     if(!a) return null;
-    const o = activityOption(a, chosen[key]);
-    return { key, name:a.name, icon:a.icon, price:o.price, optionLabel:o.label };
+    const c = chosen[key];                       // { opt, day, time, days }
+    const o = activityOption(a, c.opt);
+    return { key, name:a.name, icon:a.icon, price:o.price, optionLabel:o.label, day:c.day, time:c.time, days:c.days };
   }).filter(Boolean);
+}
+/* ---- day/time helpers for scheduling an activity within the stay ---- */
+function isoOf(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function activityDays(a, optIdx){
+  if(a.options && a.options[optIdx] && a.options[optIdx].days) return a.options[optIdx].days;
+  return a.days || 1;
+}
+function stayDays(){
+  const out = [];
+  if(!bkIn.value || !bkOut.value) return out;
+  const start = new Date(bkIn.value+'T00:00:00'), end = new Date(bkOut.value+'T00:00:00');
+  for(let d = new Date(start); d < end; d.setDate(d.getDate()+1)) out.push(isoOf(d));   // each day you're here
+  return out;
+}
+const ACT_TIMES = (() => { const t=[]; for(let h=10; h<=17; h++){ t.push(`${h}:00`); if(h<17) t.push(`${h}:30`); } return t; })();
+function fmtTime(t){
+  const [h,m] = t.split(':').map(Number);
+  const ap = h >= 12 ? 'PM' : 'AM';
+  const h12 = ((h+11)%12)+1;
+  return `${h12}:${String(m).padStart(2,'0')} ${ap}`;
 }
 
 /* ---- render lodging options, each with a "how many?" box ---- */
@@ -162,11 +188,15 @@ function renderActivities(){
   const cards = ACTIVITIES.map(a => {
     const ok = activityInSeasonForStay(a, bkIn.value, bkOut.value);
     const isChosen = Object.prototype.hasOwnProperty.call(chosen, a.key);
-    const opt = isChosen ? activityOption(a, chosen[a.key]) : null;
+    const c = isChosen ? chosen[a.key] : null;
+    const opt = isChosen ? activityOption(a, c.opt) : null;
     let right;
     if(!ok)            right = `<span class="bk-act-season">Out of season</span>`;
-    else if(isChosen)  right = `<span class="bk-act-chosen">${opt.label?opt.label+' · ':''}${money(opt.price)}</span>`
-                             + `<button type="button" class="bk-act-remove" data-remove="${a.key}" aria-label="Remove ${a.name}">✕</button>`;
+    else if(isChosen){
+      const when = c.day ? `${prettyDate(c.day)}${c.time?` · ${fmtTime(c.time)}`:''}` : '';
+      right = `<span class="bk-act-chosen">${opt.label?opt.label+' · ':''}${money(opt.price)}${when?`<br><small>${when}</small>`:''}</span>`
+            + `<button type="button" class="bk-act-remove" data-remove="${a.key}" aria-label="Remove ${a.name}">✕</button>`;
+    }
     else               right = `<span class="bk-act-cta">Choose →</span>`;
     const popCls = (a.key === justAdded) ? ' pop' : '';
     return `
@@ -212,22 +242,22 @@ bkActsWrap.addEventListener('keydown', e => {
   if(card){ e.preventDefault(); card.click(); }
 });
 
-/* ---- the options popup ---- */
+/* ---- the options popup: option → day → time → confirm ---- */
+let popupActKey = null, popupOptIdx = null, popupDay = null, popupTime = null;
+
 function openActivityOptions(key){
   const a = ACTIVITIES.find(x => x.key === key);
   if(!a) return;
+  popupActKey = key;
+  const existing = chosen[key];
+  popupOptIdx = existing ? existing.opt : null;
+  popupDay = existing ? existing.day : null;
+  popupTime = existing ? existing.time : null;
   actOptTitle.textContent = a.name;
   actOptTagline.textContent = a.tagline || '';
   const blurb = (a.desc || a.short || '').replace(/\s+/g,' ').trim();
   actOptDesc.textContent = blurb.length > 220 ? blurb.slice(0,218) + '…' : blurb;
-  const opts = (a.options && a.options.length) ? a.options : [{ label:'Book this trip', price:a.price || 0 }];
-  actOptList.innerHTML = opts.map((o,i) => `
-      <button type="button" class="act-opt-choice${chosen[key]===i?' current':''}" data-key="${key}" data-idx="${i}">
-        <span class="act-opt-label">${o.label}${chosen[key]===i?' <small>✓ selected</small>':''}</span>
-        <span class="act-opt-price">${money(o.price)}</span>
-      </button>`).join('')
-    + (Object.prototype.hasOwnProperty.call(chosen, key)
-        ? `<button type="button" class="act-opt-remove" data-remove="${key}">Remove from trip</button>` : '');
+  showOptionStage();
   actOptBackdrop.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -235,23 +265,80 @@ function closeActivityOptions(){
   actOptBackdrop.classList.remove('open');
   document.body.style.overflow = '';
 }
-actOptList.addEventListener('click', e => {
+function showOptionStage(errorMsg){
+  const a = ACTIVITIES.find(x => x.key === popupActKey);
+  actOptStageTitle.textContent = 'Choose an option';
+  const opts = (a.options && a.options.length) ? a.options : [{ label:'Book this trip', price:a.price || 0 }];
+  actOptStage.innerHTML =
+    (errorMsg ? `<p class="act-opt-error">${errorMsg}</p>` : '')
+    + opts.map((o,i) => {
+        const d = activityDays(a, i);
+        const dur = d > 1 ? ` <small>· ${d} days</small>` : '';
+        return `<button type="button" class="act-opt-choice${popupOptIdx===i?' current':''}" data-idx="${i}">
+          <span class="act-opt-label">${o.label}${dur}</span>
+          <span class="act-opt-price">${money(o.price)}</span>
+        </button>`;
+      }).join('')
+    + (Object.prototype.hasOwnProperty.call(chosen, popupActKey)
+        ? `<button type="button" class="act-opt-remove" data-remove="${popupActKey}">Remove from trip</button>` : '');
+  actOptFoot.hidden = true;
+}
+function showDayStage(){
+  const a = ACTIVITIES.find(x => x.key === popupActKey);
+  const dur = activityDays(a, popupOptIdx);
+  const days = stayDays();
+  actOptStageTitle.textContent = dur > 1 ? 'Pick a start day' : 'Pick a day';
+  let html = '<div class="day-pick">';
+  for(let i = 0; i + dur <= days.length; i++){
+    const startISO = days[i];
+    const label = dur > 1 ? `${prettyDate(startISO)} – ${prettyDate(days[i+dur-1])}` : prettyDate(startISO);
+    html += `<button type="button" class="day-opt${popupDay===startISO?' sel':''}" data-day="${startISO}">${label}</button>`;
+  }
+  html += '</div>';
+  if(dur === 1 && popupDay){
+    html += `<div class="feature-title" style="margin-top:16px;">Pick a time</div>`
+          + `<p class="bk-help">Any time between 10am and 5pm.</p><div class="time-pick">`
+          + ACT_TIMES.map(t => `<button type="button" class="time-opt${popupTime===t?' sel':''}" data-time="${t}">${fmtTime(t)}</button>`).join('')
+          + `</div>`;
+  }
+  actOptStage.innerHTML = html;
+  actOptFoot.hidden = false;
+  const needTime = dur === 1;
+  actOptConfirm.disabled = !(popupDay && (!needTime || popupTime));
+  actOptHint.textContent = dur > 1 ? `${dur}-day trip` : (popupDay && !popupTime ? 'Now pick a time' : '');
+}
+actOptStage.addEventListener('click', e => {
   const choice = e.target.closest('.act-opt-choice');
   if(choice){
-    if(choice.classList.contains('selecting')) return;   // ignore double-taps mid-animation
-    // mark every sibling as not-current, animate the picked one, then commit
-    actOptList.querySelectorAll('.act-opt-choice').forEach(c => c.classList.remove('current'));
-    choice.classList.add('selecting');
-    const key = choice.dataset.key, idx = +choice.dataset.idx;
-    setTimeout(() => {
-      chosen[key] = idx; justStay = false; justAdded = key;
-      closeActivityOptions();
-      updateSummary();
-    }, 520);
+    const a = ACTIVITIES.find(x => x.key === popupActKey);
+    const idx = +choice.dataset.idx;
+    const dur = activityDays(a, idx);
+    const days = stayDays();
+    if(days.length === 0){ showOptionStage('Pick your stay dates first (Step 1) to schedule this.'); return; }
+    if(dur > days.length){ showOptionStage(`This trip needs ${dur} days — your stay is only ${days.length} night${days.length>1?'s':''}. Add more nights to book it.`); return; }
+    const same = chosen[popupActKey] && chosen[popupActKey].opt === idx;
+    popupOptIdx = idx;
+    popupDay  = same ? chosen[popupActKey].day  : null;
+    popupTime = same ? chosen[popupActKey].time : null;
+    showDayStage();
     return;
   }
+  const day = e.target.closest('.day-opt');
+  if(day){ popupDay = day.dataset.day; popupTime = null; showDayStage(); return; }
+  const time = e.target.closest('.time-opt');
+  if(time){ popupTime = time.dataset.time; showDayStage(); return; }
   const rem = e.target.closest('.act-opt-remove');
   if(rem){ delete chosen[rem.dataset.remove]; closeActivityOptions(); updateSummary(); }
+});
+actOptBack.addEventListener('click', () => showOptionStage());
+actOptConfirm.addEventListener('click', () => {
+  if(actOptConfirm.disabled) return;
+  const a = ACTIVITIES.find(x => x.key === popupActKey);
+  const dur = activityDays(a, popupOptIdx);
+  chosen[popupActKey] = { opt: popupOptIdx, day: popupDay, time: dur === 1 ? popupTime : null, days: dur };
+  justStay = false; justAdded = popupActKey;
+  closeActivityOptions();
+  updateSummary();
 });
 document.getElementById('actOptClose').addEventListener('click', closeActivityOptions);
 actOptBackdrop.addEventListener('click', e => { if(e.target === actOptBackdrop) closeActivityOptions(); });
@@ -467,7 +554,7 @@ function buildSummaryHTML(){
   if(t.lodgings.length && t.nights > 0)
     rows.push(`<div class="bk-srow"><span>Lodging (${t.nights} night${t.nights>1?'s':''})</span><b>${money(t.lodgingTotal)}</b></div>`);
   if(t.acts.length)
-    rows.push(`<div class="bk-srow bk-acts"><span>Activities</span><b>${t.acts.map(a=>`${a.icon} ${a.name}${a.optionLabel?` (${a.optionLabel})`:''} — ${money(a.price)}`).join('<br>')}</b></div>`);
+    rows.push(`<div class="bk-srow bk-acts"><span>Activities</span><b>${t.acts.map(a=>`${a.icon} ${a.name}${a.optionLabel?` (${a.optionLabel})`:''}${a.day?` · ${prettyDate(a.day)}${a.time?` ${fmtTime(a.time)}`:''}`:''} — ${money(a.price)}`).join('<br>')}</b></div>`);
   else if(justStay)
     rows.push(`<div class="bk-srow"><span>Activities</span><b>Just the stay</b></div>`);
   if(t.camps.length)
@@ -498,7 +585,7 @@ function gcalUrl(trip){
     `Lodging: ${t.lodgings.map(x=>`${x.qty}× ${x.l.name} ($${x.l.rate}/night)`).join(', ') || '—'}`,
     `Nights: ${t.nights} (${prettyDate(trip.in)} – ${prettyDate(trip.out)})`,
     `Lodging total: ${money(t.lodgingTotal)}`,
-    t.acts.length ? `Activities: ${t.acts.map(a=>`${a.name}${a.optionLabel?` — ${a.optionLabel}`:''} (${money(a.price)})`).join(', ')}` : 'Activities: just the stay',
+    t.acts.length ? `Activities: ${t.acts.map(a=>`${a.name}${a.optionLabel?` — ${a.optionLabel}`:''}${a.day?` on ${prettyDate(a.day)}${a.time?` at ${fmtTime(a.time)}`:''}`:''} (${money(a.price)})`).join(', ')}` : 'Activities: just the stay',
     t.camps.length ? `Camps: ${t.camps.map(x=>`${x.camp.name} — ${x.week.label} (${x.camp.ages[x.week.age]})`).join(', ')}` : null,
     '',
     `Subtotal: ${money(t.subtotal)}`,

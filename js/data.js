@@ -111,7 +111,7 @@ const ORDER=["owners","central","cabins","bathhouse","processing","outdoor","rv"
 /* ============================================================ */
 const ACTIVITIES = [
   {
-    key:"whitetail", icon:"🦌", price:6500,
+    key:"whitetail", icon:"🦌", price:6500, days:5,
     name:"Selkirk Late-Season Whitetail Rut Hunt",
     short:"5-day guided trophy hunt",
     tagline:"Premium 1-on-1 · November rut",
@@ -134,7 +134,7 @@ const ACTIVITIES = [
     season:[[11,1],[11,30]]
   },
   {
-    key:"turkey", icon:"🦃", price:2450,
+    key:"turkey", icon:"🦃", price:2450, days:3,
     name:"NE Washington Merriam's Turkey Double-Header",
     short:"3-day spring gobbler hunt",
     tagline:"2-on-1 · Spring strut, Apr–May",
@@ -156,7 +156,7 @@ const ACTIVITIES = [
     season:[[4,15],[5,31]]
   },
   {
-    key:"charter", icon:"🎣", price:3200,
+    key:"charter", icon:"🎣", price:3200, days:4,
     name:"Walleye & Lake Roosevelt Sturgeon Charter",
     short:"4-day freshwater angling",
     tagline:"Guided boat charter · Jun–Jul",
@@ -243,7 +243,7 @@ const ACTIVITIES = [
     season:[[5,24],[3,15]]
   },
   {
-    key:"sasquatch", icon:"🦶", options:[{label:"Evening Track-and-Call",price:350},{label:"Half-Day Summit",price:550},{label:"Overnight Expedition",price:850}],
+    key:"sasquatch", icon:"🦶", options:[{label:"Evening Track-and-Call",price:350},{label:"Half-Day Summit",price:550},{label:"Overnight Expedition",price:850,days:2}],
     name:"The Sasquatch Expedition",
     short:"Guided hike & backcountry camp-out",
     tagline:"Bigfoot hike & camp · summer–fall",
