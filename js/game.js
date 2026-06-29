@@ -12,75 +12,74 @@
 
   const TILE = 16;
   const VIEW_W = canvas.width, VIEW_H = canvas.height;      // 352 x 224
-  const MAP_W = 44, MAP_H = 28;
+  const MAP_W = 50, MAP_H = 29;
   const WORLD_W = MAP_W * TILE, WORLD_H = MAP_H * TILE;
 
-  /* ---------- world data ---------- */
-  const terrain = [];   // 'g' grass, 'w' water, 'p' path
-  const solid = [];
+  /* ---------- world (laid out to match the property site map) ---------- */
+  const terrain = [], solid = [];   // terrain: 'g' grass, 'w' water, 'p' path, 'b' bridge
   for(let y=0;y<MAP_H;y++){ terrain[y]=[]; solid[y]=[]; for(let x=0;x<MAP_W;x++){ terrain[y][x]='g'; solid[y][x]=false; } }
+  const inB=(i,j)=>i>=0&&j>=0&&i<MAP_W&&j<MAP_H;
 
-  function rect(x,y,w,h,fn){ for(let j=y;j<y+h;j++) for(let i=x;i<x+w;i++) if(i>=0&&j>=0&&i<MAP_W&&j<MAP_H) fn(i,j); }
-
-  // creek across the top (rows 4-5), with a bridge gap at x=20-21
-  rect(0,4,MAP_W,2,(i,j)=>{ terrain[j][i]='w'; solid[j][i]=true; });
-  rect(20,4,2,2,(i,j)=>{ terrain[j][i]='p'; solid[j][i]=false; });   // bridge
-
-  // a pond (the second-photo vibe)
-  const pond = {x:33,y:10,w:6,h:4};
-  rect(pond.x,pond.y,pond.w,pond.h,(i,j)=>{ terrain[j][i]='w'; solid[j][i]=true; });
-
-  // buildings — key matches BUILDINGS in data.js
-  const buildings = [
-    { key:'bathhouse',  name:'Bathhouse',         tx:6,  ty:8,  tw:4, th:3, roof:'#6d8aa6', wall:'#557390' },
-    { key:'outdoor',    name:'Creek-side Fire Pit', tx:2, ty:13, tw:3, th:2, type:'fire' },
-    { key:'cabins',     name:'The Cabins',        tx:6,  ty:15, tw:5, th:3, roof:'#7a8a3f', wall:'#5f6b33' },
-    { key:'rv',         name:'RV & Tent Sites',   tx:2,  ty:20, tw:4, th:2, type:'camp' },
-    { key:'central',    name:'Central Lodge',     tx:18, ty:8,  tw:5, th:3, roof:'#8a5630', wall:'#6f4424' },
-    { key:'processing', name:'Game Processing',   tx:18, ty:13, tw:5, th:3, roof:'#566069', wall:'#444e56' },
-    { key:'storage',    name:'Storage Lot',       tx:19, ty:18, tw:4, th:2, roof:'#b09a6e', wall:'#8a784f' },
-    { key:'owners',     name:"Owner's Lodge",     tx:30, ty:18, tw:5, th:3, roof:'#8a5630', wall:'#6f4424' },
-  ];
-  buildings.forEach(b => {
-    rect(b.tx,b.ty,b.tw,b.th,(i,j)=>{ solid[j][i]=true; });
-    b.doorTx = b.tx + Math.floor(b.tw/2);
-    b.doorTy = b.ty + b.th;                       // tile just below
-    if(b.doorTy<MAP_H){ terrain[b.doorTy][b.doorTx]='p'; solid[b.doorTy][b.doorTx]=false; }
-    b.cx = (b.tx + b.tw/2)*TILE;
-    b.cy = (b.ty + b.th)*TILE + 6;
-  });
-
-  // gravel paths between things (cosmetic)
-  function path(x0,y0,x1,y1){
-    if(x0===x1){ for(let y=Math.min(y0,y1);y<=Math.max(y0,y1);y++) if(!solid[y][x0]) terrain[y][x0]='p'; }
-    else { for(let x=Math.min(x0,x1);x<=Math.max(x0,x1);x++) if(!solid[y0][x]) terrain[y0][x]='p'; }
-  }
-  path(21,6,21,25);
-  buildings.forEach(b => { path(b.doorTx, b.doorTy, 21, b.doorTy); path(b.doorTx,b.doorTy,b.doorTx,b.doorTy); });
-
-  // trees: dense timber up top + a leafy border + a little scatter
-  const trees = [];
-  function addTree(i,j){ if(i>=0&&j>=0&&i<MAP_W&&j<MAP_H && terrain[j][i]==='g' && !solid[j][i]){ solid[j][i]=true; trees.push({x:i*TILE+TILE/2, y:j*TILE+TILE}); } }
-  for(let i=0;i<MAP_W;i++){ addTree(i,0); addTree(i,1); addTree(i,MAP_H-1); }   // top timber + bottom edge
-  for(let j=0;j<MAP_H;j++){ addTree(0,j); addTree(MAP_W-1,j); }                  // side edges
-  // scattered (deterministic-ish via simple pattern + a bit of random)
-  for(let j=2;j<MAP_H-1;j++) for(let i=1;i<MAP_W-1;i++){
-    if(terrain[j][i]==='g' && !solid[j][i] && Math.random()<0.05){
-      // keep clear of building doors
-      let near=false; buildings.forEach(b=>{ if(Math.abs(i-b.doorTx)<2 && Math.abs(j-b.doorTy)<2) near=true; });
-      if(!near) addTree(i,j);
+  // rasterize a polyline across tiles (brush = extra radius in tiles)
+  function tline(pts, brush, fn){
+    for(let k=0;k<pts.length-1;k++){
+      const [x0,y0]=pts[k], [x1,y1]=pts[k+1];
+      const steps=Math.max(Math.abs(x1-x0),Math.abs(y1-y0))*2 || 1;
+      for(let s=0;s<=steps;s++){
+        const cx=Math.round(x0+(x1-x0)*s/steps), cy=Math.round(y0+(y1-y0)*s/steps);
+        for(let bj=-brush;bj<=brush;bj++) for(let bi=-brush;bi<=brush;bi++) if(inB(cx+bi,cy+bj)) fn(cx+bi,cy+bj);
+      }
     }
   }
 
-  // little grass flowers (decoration only)
-  const flowers = [];
-  for(let k=0;k<70;k++){
-    const i=(Math.random()*MAP_W)|0, j=(2+Math.random()*(MAP_H-3))|0;
-    if(terrain[j]&&terrain[j][i]==='g'&&!solid[j][i]) flowers.push({x:i*TILE+(4+(Math.random()*8|0)), y:j*TILE+(6+(Math.random()*7|0)), c:Math.random()<0.5?'#e85d6a':'#f2c14e'});
-  }
+  // East Fork Cedar Creek — a clean horizontal run, then a diagonal down-right
+  tline([[0,7],[28,7],[49,22]], 0, (i,j)=>{ terrain[j][i]='w'; solid[j][i]=true; });
+  // gravel roads: Cedar Creek Rd across the top, the center driveway, the west spur
+  const pave=(i,j)=>{ if(terrain[j][i]!=='w'){ terrain[j][i]='p'; solid[j][i]=false; } };
+  tline([[0,2],[32,2],[49,17]], 0, pave);            // main road
+  tline([[18,2],[18,21],[28,24]], 0, pave);          // center driveway → owner's lodge
+  tline([[2,13],[18,13]], 0, pave);                  // spur to the west buildings
+  // bridge where the driveway crosses the creek
+  [[17,7],[18,7],[19,7]].forEach(([i,j])=>{ terrain[j][i]='b'; solid[j][i]=false; });
 
-  /* ---------- player ---------- */
-  const player = { x:21.5*TILE, y:7.5*TILE, speed:74, frame:0, anim:0, moving:false };
+  // buildings — key matches BUILDINGS in data.js (positions from the site map)
+  const buildings = [
+    { key:'outdoor',    name:'Creek-side Fire Pit', tx:2,  ty:10, tw:2, th:2, type:'fire' },
+    { key:'bathhouse',  name:'Bathhouse',          tx:8,  ty:10, tw:3, th:2, roof:'#6d8aa6', wall:'#557390' },
+    { key:'rv',         name:'RV & Tent Sites',    tx:1,  ty:14, tw:6, th:3, type:'camp' },
+    { key:'cabins',     name:'The Cabins',         tx:8,  ty:14, tw:5, th:3, roof:'#7a8a3f', wall:'#5f6b33' },
+    { key:'central',    name:'Central Lodge',      tx:20, ty:9,  tw:5, th:3, roof:'#8a5630', wall:'#6f4424' },
+    { key:'processing', name:'Game Processing',    tx:20, ty:13, tw:5, th:2, roof:'#566069', wall:'#444e56' },
+    { key:'storage',    name:'Storage Lot',        tx:21, ty:17, tw:4, th:2, roof:'#b09a6e', wall:'#8a784f' },
+    { key:'owners',     name:"Owner's Lodge",      tx:28, ty:22, tw:5, th:3, roof:'#8a5630', wall:'#6f4424' },
+  ];
+  buildings.forEach(b => {
+    for(let j=b.ty;j<b.ty+b.th;j++) for(let i=b.tx;i<b.tx+b.tw;i++) if(inB(i,j)){ solid[j][i]=true; if(terrain[j][i]==='p') terrain[j][i]='g'; }
+    b.doorTx = b.tx + Math.floor(b.tw/2); b.doorTy = b.ty + b.th;     // door = tile just below
+    if(inB(b.doorTx,b.doorTy)){ terrain[b.doorTy][b.doorTx]='p'; solid[b.doorTy][b.doorTx]=false; }
+    b.cx = (b.tx + b.tw/2)*TILE; b.cy = (b.ty + b.th)*TILE + 6;
+  });
+
+  // trees: standing timber up top & to the NE, leafy borders, light scatter
+  const trees = [];
+  function addTree(i,j){ if(inB(i,j) && terrain[j][i]==='g' && !solid[j][i]){ solid[j][i]=true; trees.push({x:i*TILE+TILE/2, y:j*TILE+TILE}); } }
+  function nearDoor(i,j){ return buildings.some(b=>Math.abs(i-b.doorTx)<=1 && Math.abs(j-b.doorTy)<=1); }
+  for(let j=0;j<MAP_H;j++) for(let i=0;i<MAP_W;i++){
+    if(nearDoor(i,j)) continue;
+    let timber = j<=1;                                          // tree line along the top
+    if(!timber && j>=2 && j<=17){ const rx=32+(j-2)/15*17; if(i>rx+1) timber=true; }   // timber NE of the road
+    if(timber) addTree(i,j);
+  }
+  for(let j=2;j<MAP_H;j++){ if(Math.random()<0.5) addTree(0,j); if(Math.random()<0.5) addTree(MAP_W-1,j); }    // sides
+  for(let i=0;i<MAP_W;i++){ if(Math.random()<0.55) addTree(i,MAP_H-1); }                                       // bottom
+  for(let j=8;j<MAP_H-1;j++) for(let i=1;i<MAP_W-1;i++){ if(Math.random()<0.03 && !nearDoor(i,j)) addTree(i,j); } // scatter
+
+  // grass flowers (decoration)
+  const flowers = [];
+  for(let k=0;k<80;k++){ const i=(Math.random()*MAP_W)|0, j=(2+Math.random()*(MAP_H-3))|0; if(terrain[j]&&terrain[j][i]==='g'&&!solid[j][i]) flowers.push({x:i*TILE+(4+(Math.random()*8|0)), y:j*TILE+(6+(Math.random()*7|0)), c:Math.random()<0.5?'#e85d6a':'#f2c14e'}); }
+
+  /* ---------- player (starts on the driveway, just south of the bridge) ---------- */
+  const player = { x:18.5*TILE, y:8.5*TILE, speed:74, frame:0, anim:0, moving:false };
 
   function isSolidPx(px,py){
     const i=(px/TILE)|0, j=(py/TILE)|0;
@@ -178,6 +177,7 @@
       const sx=i*TILE-cam.x, sy=j*TILE-cam.y, tt=terrain[j][i];
       if(tt==='w'){ drawWater(sx,sy,i,j); }
       else if(tt==='p'){ ctx.fillStyle='#cdbb8e'; ctx.fillRect(sx,sy,TILE,TILE); ctx.fillStyle='rgba(120,95,60,.18)'; ctx.fillRect(sx+3,sy+9,2,2); ctx.fillRect(sx+10,sy+4,2,2); }
+      else if(tt==='b'){ ctx.fillStyle='#a07c4e'; ctx.fillRect(sx,sy,TILE,TILE); ctx.fillStyle='#7a5a34'; ctx.fillRect(sx,sy,TILE,2); ctx.fillRect(sx,sy+7,TILE,2); ctx.fillRect(sx,sy+14,TILE,2); }
       else { ctx.fillStyle=((i+j)&1)?'#74b35a':'#6aa850'; ctx.fillRect(sx,sy,TILE,TILE); }
     }
     // flowers
