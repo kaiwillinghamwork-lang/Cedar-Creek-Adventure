@@ -11,10 +11,12 @@
 /* ============================================================ */
 
 const LODGING = [
-  { key:'cabin', name:'Mini Cabin',    rate:150, modal:'cabins',
+  { key:'cabin', name:'Mini Cabin',     rate:150, modal:'cabins',
     blurb:'Your own warm cabin tucked in the timber.' },
-  { key:'rv',    name:'RV Rental Spot', rate:35,  icon:'🚐',
+  { key:'rv',    name:'RV Rental Spot',  rate:35,  icon:'🚐',
     blurb:'Level pad with power & water for your rig.' },
+  { key:'camp',  name:'Campground',      rate:25,  icon:'⛺',
+    blurb:'Pitch a tent under the pines by the creek.' },
 ];
 const LOCATION = '3928 Cedar Creek Rd, Colville, WA';
 const TAX_RATE = 0.081;   // ~8.1% (Colville, WA) — change to your real rate
@@ -42,6 +44,7 @@ const actOptList     = document.getElementById('actOptList');
 /* ---- selection state ---- */
 let chosen = {};       // { activityKey: optionIndex }
 let justStay = false;  // "no activities — just the stay"
+let justAdded = null;  // key of the activity just added (for a one-shot pop animation)
 
 /* ---- helpers ---- */
 function nightsBetween(a,b){
@@ -127,8 +130,9 @@ function renderActivities(){
     else if(isChosen)  right = `<span class="bk-act-chosen">${opt.label?opt.label+' · ':''}${money(opt.price)}</span>`
                              + `<button type="button" class="bk-act-remove" data-remove="${a.key}" aria-label="Remove ${a.name}">✕</button>`;
     else               right = `<span class="bk-act-cta">Choose →</span>`;
+    const popCls = (a.key === justAdded) ? ' pop' : '';
     return `
-    <div class="bk-pick${isChosen?' chosen':''}${ok?'':' out-of-season'}" ${ok?`data-key="${a.key}" role="button" tabindex="0"`:'aria-disabled="true"'}>
+    <div class="bk-pick${isChosen?' chosen':''}${ok?'':' out-of-season'}${popCls}" ${ok?`data-key="${a.key}" role="button" tabindex="0"`:'aria-disabled="true"'}>
       <span class="bk-act-card">
         <span class="bk-act-icon">${a.icon}</span>
         <span class="bk-act-main">
@@ -153,13 +157,14 @@ function renderActivities(){
     </div>`;
 
   bkActsWrap.innerHTML = cards + none;
+  justAdded = null;   // pop only plays once
 }
 
 bkActsWrap.addEventListener('click', e => {
   const remove = e.target.closest('[data-remove]');
-  if(remove){ delete chosen[remove.dataset.remove]; renderActivities(); updateSummary(); return; }
+  if(remove){ delete chosen[remove.dataset.remove]; updateSummary(); return; }
   const none = e.target.closest('[data-none]');
-  if(none){ justStay = !justStay; if(justStay) chosen = {}; renderActivities(); updateSummary(); return; }
+  if(none){ justStay = !justStay; if(justStay) chosen = {}; updateSummary(); return; }
   const card = e.target.closest('.bk-pick[data-key]');
   if(card) openActivityOptions(card.dataset.key);
 });
@@ -193,9 +198,21 @@ function closeActivityOptions(){
 }
 actOptList.addEventListener('click', e => {
   const choice = e.target.closest('.act-opt-choice');
-  if(choice){ chosen[choice.dataset.key] = +choice.dataset.idx; justStay = false; closeActivityOptions(); renderActivities(); updateSummary(); return; }
+  if(choice){
+    if(choice.classList.contains('selecting')) return;   // ignore double-taps mid-animation
+    // mark every sibling as not-current, animate the picked one, then commit
+    actOptList.querySelectorAll('.act-opt-choice').forEach(c => c.classList.remove('current'));
+    choice.classList.add('selecting');
+    const key = choice.dataset.key, idx = +choice.dataset.idx;
+    setTimeout(() => {
+      chosen[key] = idx; justStay = false; justAdded = key;
+      closeActivityOptions();
+      updateSummary();
+    }, 520);
+    return;
+  }
   const rem = e.target.closest('.act-opt-remove');
-  if(rem){ delete chosen[rem.dataset.remove]; closeActivityOptions(); renderActivities(); updateSummary(); }
+  if(rem){ delete chosen[rem.dataset.remove]; closeActivityOptions(); updateSummary(); }
 });
 document.getElementById('actOptClose').addEventListener('click', closeActivityOptions);
 actOptBackdrop.addEventListener('click', e => { if(e.target === actOptBackdrop) closeActivityOptions(); });

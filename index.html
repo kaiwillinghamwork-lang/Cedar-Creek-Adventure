@@ -12,6 +12,12 @@
 <!-- shared logo nav (built by site.js) -->
 <div id="siteHeader"></div>
 
+<!-- ============ LEFT ACTIVITIES DROPDOWN ============ -->
+<div class="left-acts" id="leftActs">
+  <button class="left-acts-btn" id="leftActsBtn" aria-expanded="false">🎯 Activities <span class="caret">▾</span></button>
+  <div class="left-acts-menu" id="leftActsMenu" hidden></div>
+</div>
+
 <!-- ============ HERO ============ -->
 <header class="hero" id="top">
   <svg class="hero-trees" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
@@ -289,6 +295,28 @@
       <div class="feature-title">✦ What this building has</div>
       <ul class="feature-list" id="mFeatures"></ul>
       <div class="stat-row" id="mStats"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ACTIVITY INFO MODAL (opened from the left dropdown) ============ -->
+<div class="modal-backdrop" id="actBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="aTitle">
+    <div class="modal-head">
+      <div>
+        <div class="tagline" id="aTagline"></div>
+        <h2 id="aTitle"></h2>
+      </div>
+      <button class="close-btn" id="actCloseBtn" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="act-gallery" id="aGallery"></div>
+      <p class="desc" id="aDesc"></p>
+      <div class="feature-title">📋 What a day looks like</div>
+      <ul class="feature-list" id="aDay"></ul>
+      <div class="feature-title" style="margin-top:22px;">✦ Included</div>
+      <ul class="feature-list" id="aIncluded"></ul>
+      <div class="stat-row" id="aStats"></div>
     </div>
   </div>
 </div>

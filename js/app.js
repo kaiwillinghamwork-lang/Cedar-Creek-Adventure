@@ -115,3 +115,64 @@ document.querySelectorAll('.hotspot, .map-hotspot, .bldg').forEach(h=>{
   h.addEventListener('click',()=>openModal(key));
   h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openModal(key);}});
 });
+
+/* ---- is an activity in season right now? ---- */
+function isInSeason(a){
+  if(!a.season) return false;
+  const now=new Date();
+  const md=(now.getMonth()+1)*100+now.getDate();
+  const start=a.season[0][0]*100+a.season[0][1];
+  const end=a.season[1][0]*100+a.season[1][1];
+  return start<=end ? (md>=start && md<=end) : (md>=start || md<=end);
+}
+
+/* ---- activity info modal (opened from the left dropdown) ---- */
+const actBackdrop=document.getElementById('actBackdrop');
+function openActivity(key){
+  const a=ACTIVITIES.find(x=>x.key===key);
+  if(!a) return;
+  const inSeason=isInSeason(a);
+  document.getElementById('aTitle').innerHTML=`${a.name}<span class="act-status ${inSeason?'on':'off'}">${inSeason?'● IN SEASON NOW':'OFF SEASON'}</span>`;
+  document.getElementById('aTagline').textContent=a.tagline;
+  const gal=document.getElementById('aGallery');
+  if(a.media && a.media.length){
+    gal.innerHTML=a.media.map(m=>`<div class="act-media"><img src="${m.src}" alt="${(m.alt||'').replace(/"/g,'')}" loading="lazy"></div>`).join('');
+    gal.style.display='';
+  } else { gal.innerHTML=''; gal.style.display='none'; }
+  document.getElementById('aDesc').textContent=a.desc;
+  document.getElementById('aDay').innerHTML=a.day.map(d=>`<li>${d}</li>`).join('');
+  document.getElementById('aIncluded').innerHTML=a.included.map(i=>`<li>${i}</li>`).join('');
+  document.getElementById('aStats').innerHTML=a.stats.map(s=>`<div class="stat"><b>${s[1]}</b>${s[0]}</div>`).join('');
+  lastFocused=document.activeElement;
+  actBackdrop.classList.add('open');
+  document.body.style.overflow='hidden';
+  trapFocus(actBackdrop);
+}
+function closeActivity(){
+  actBackdrop.classList.remove('open');
+  document.body.style.overflow='';
+  releaseFocus();
+}
+if(actBackdrop){
+  document.getElementById('actCloseBtn').addEventListener('click',closeActivity);
+  actBackdrop.addEventListener('click',e=>{if(e.target===actBackdrop)closeActivity();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeActivity();});
+}
+
+/* ---- left-side activities dropdown ---- */
+const leftActsBtn=document.getElementById('leftActsBtn');
+const leftActsMenu=document.getElementById('leftActsMenu');
+if(leftActsBtn && leftActsMenu){
+  leftActsMenu.innerHTML=ACTIVITIES.map(a=>{
+    const active=isInSeason(a)?'<span class="left-acts-badge">● ACTIVE</span>':'';
+    return `<button class="left-acts-item" data-key="${a.key}"><span class="ico">${a.icon}</span><span class="txt"><span>${a.name}${active}</span><small>${a.short}</small></span></button>`;
+  }).join('');
+  function toggleLeftActs(open){
+    const show=(open===undefined)?leftActsMenu.hasAttribute('hidden'):open;
+    if(show){ leftActsMenu.removeAttribute('hidden'); leftActsBtn.setAttribute('aria-expanded','true'); }
+    else { leftActsMenu.setAttribute('hidden',''); leftActsBtn.setAttribute('aria-expanded','false'); }
+  }
+  leftActsBtn.addEventListener('click',e=>{ e.stopPropagation(); toggleLeftActs(); });
+  leftActsMenu.addEventListener('click',e=>{ const it=e.target.closest('.left-acts-item'); if(it){ openActivity(it.dataset.key); toggleLeftActs(false); } });
+  document.addEventListener('click',e=>{ if(!document.getElementById('leftActs').contains(e.target)) toggleLeftActs(false); });
+}
