@@ -747,6 +747,37 @@
 .camp-sum-note{color:#9fb3a3;font-size:.82rem;margin-top:12px;line-height:1.5;}
 @media(max-width:560px){ .camp-hero-logo{width:120px;height:120px;} }
 
+/* ===== walkable overworld game (home page map) ===== */
+.game-wrap{max-width:760px;margin:0 auto;}
+.game-stage{position:relative;background:#2c5238;border-radius:14px;padding:10px;box-shadow:0 18px 50px rgba(0,0,0,.4);}
+#gameCanvas{
+  display:block;width:100%;height:auto;aspect-ratio:352/224;
+  image-rendering:pixelated;image-rendering:crisp-edges;
+  border-radius:8px;background:#6aa850;cursor:pointer;outline:none;
+}
+.game-prompt{
+  position:absolute;left:50%;bottom:20px;transform:translateX(-50%);
+  background:rgba(15,25,18,.88);color:var(--sand);border:1px solid rgba(212,163,115,.5);
+  padding:8px 16px;border-radius:10px;font-size:.92rem;white-space:nowrap;cursor:pointer;
+  box-shadow:0 6px 16px rgba(0,0,0,.45);
+}
+.game-prompt b{color:var(--cedar-light);}
+.game-pad{position:absolute;left:18px;bottom:18px;width:120px;height:120px;touch-action:none;}
+.gp-btn{
+  position:absolute;width:38px;height:38px;border:none;border-radius:9px;
+  background:rgba(18,28,20,.5);color:#fff;font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  -webkit-user-select:none;user-select:none;touch-action:none;
+}
+.gp-btn:active{background:rgba(200,146,43,.75);}
+.gp-up{left:41px;top:0;} .gp-down{left:41px;top:82px;} .gp-left{left:0;top:41px;} .gp-right{left:82px;top:41px;}
+.gp-a{
+  position:absolute;right:20px;bottom:32px;width:52px;height:52px;border-radius:50%;
+  background:rgba(200,146,43,.9);color:#22160c;font-weight:900;font-size:1.25rem;
+}
+/* with a real mouse/keyboard, hide the touch controls — use arrow keys */
+@media (hover:hover) and (pointer:fine){ .game-pad,.gp-a{display:none;} }
+
 .bk-submit{margin-top:24px;width:100%;justify-content:center;}
 .bk-error{margin-top:12px;color:#b5462e;font-weight:600;font-size:.92rem;}
 

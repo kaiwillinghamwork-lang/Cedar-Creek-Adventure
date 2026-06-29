@@ -5,8 +5,10 @@ East Fork Cedar Creek in Colville, Washington.
 
 The page invites visitors to explore the property and the guided trips on offer:
 
-- **Interactive site map** — a hand-drawn SVG map with clickable buildings (lodges, cabins,
-  bathhouse, game processing, fire-pit area, RV/tent sites, and more).
+- **Walkable overworld map** — a little top-down (Pokémon-style) game on the home page: walk a
+  character around the basecamp with the arrow keys / WASD / on-screen pad, and step up to any
+  building (lodges, cabins, bathhouse, game processing, fire pit, RV/tent sites) to open its
+  info. Built on a `<canvas>` in `js/game.js`; opens the same building modal as the cards.
 - **Building deep-dives** — each spot opens a modal with an outside/inside view toggle, the
   "moment" it's built around, a feature list, and quick stats.
 - **Guided activities menu** — hunts, fishing charters, upland & big-game seasons, rentals,
