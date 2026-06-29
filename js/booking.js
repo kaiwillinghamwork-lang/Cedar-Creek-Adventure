@@ -40,6 +40,7 @@ const guestNote  = document.getElementById('guestNote');
 function setGuests(n){
   guests = Math.max(1, Math.min(20, n));
   guestVal.textContent = guests;
+  if(typeof renderLodging === 'function') renderLodging();   // refresh the cabin sleeps-4 warning
   updateSummary();
 }
 document.getElementById('guestMinus').addEventListener('click', () => setGuests(guests - 1));
@@ -92,9 +93,11 @@ function activityInSeasonForStay(a, startISO, endISO){
   return false;
 }
 
-function selectedLodging(){
-  const r = bkForm.querySelector('input[name="lodging"]:checked');
-  return r ? LODGING.find(l => l.key === r.value) : null;
+const lodgingQty = {};   // { lodgeKey: number reserved }
+LODGING.forEach(l => lodgingQty[l.key] = 0);
+
+function selectedLodgings(){
+  return LODGING.map(l => ({ l, qty: lodgingQty[l.key] || 0 })).filter(x => x.qty > 0);
 }
 function selectedActivities(){
   if(justStay) return [];
@@ -106,26 +109,44 @@ function selectedActivities(){
   }).filter(Boolean);
 }
 
-/* ---- render lodging options ---- */
-bkLodging.innerHTML = LODGING.map(l => {
-  const thumb = l.modal && typeof BUILDINGS !== 'undefined' && BUILDINGS[l.modal]
-    ? `<span class="bk-opt-thumb">${BUILDINGS[l.modal].out}</span>`
-    : `<span class="bk-opt-icon">${l.icon || '🏕️'}</span>`;
-  const cue = l.modal ? `<span class="bk-opt-cue">Tap to see inside →</span>` : '';
-  return `
-  <label class="bk-opt" data-key="${l.key}" ${l.modal?`data-modal="${l.modal}"`:''}>
-    <input type="radio" name="lodging" value="${l.key}">
-    <span class="bk-opt-card">
-      ${thumb}
-      <span class="bk-opt-main">
-        <span class="bk-opt-name">${l.name}</span>
-        <span class="bk-opt-blurb">${l.blurb}</span>
-        ${cue}
+/* ---- render lodging options, each with a "how many?" box ---- */
+function renderLodging(){
+  bkLodging.innerHTML = LODGING.map(l => {
+    const qty = lodgingQty[l.key] || 0;
+    const thumb = l.modal && typeof BUILDINGS !== 'undefined' && BUILDINGS[l.modal]
+      ? `<span class="bk-opt-thumb" data-see="${l.modal}">${BUILDINGS[l.modal].out}</span>`
+      : `<span class="bk-opt-icon">${l.icon || '🏕️'}</span>`;
+    const see = l.modal ? `<button type="button" class="bk-opt-see" data-see="${l.modal}">See inside →</button>` : '';
+    const warn = (l.sleeps && guests > l.sleeps)
+      ? `<span class="bk-opt-warn">⚠ Each cabin sleeps ${l.sleeps} — you'll need ${Math.ceil(guests/l.sleeps)} for ${guests} people.</span>` : '';
+    return `
+    <div class="bk-opt-q${qty>0?' chosen':''}" data-key="${l.key}">
+      <span class="bk-opt-card">
+        ${thumb}
+        <span class="bk-opt-main">
+          <span class="bk-opt-name">${l.name}</span>
+          <span class="bk-opt-blurb">${l.blurb}</span>
+          ${see}
+          ${warn}
+        </span>
+        <span class="bk-opt-right">
+          <span class="bk-opt-price">$${l.rate}<small>/night</small></span>
+          <span class="lodge-stepper">
+            <button type="button" class="lstep" data-lminus="${l.key}" aria-label="Fewer ${l.name}">−</button>
+            <span class="lqty">${qty}</span>
+            <button type="button" class="lstep" data-lplus="${l.key}" aria-label="More ${l.name}">+</button>
+          </span>
+        </span>
       </span>
-      <span class="bk-opt-price">$${l.rate}<small>/night</small></span>
-    </span>
-  </label>`;
-}).join('');
+    </div>`;
+  }).join('');
+}
+function setLodgeQty(key, n){
+  lodgingQty[key] = Math.max(0, Math.min(20, n));
+  renderLodging();
+  updateSummary();
+}
+renderLodging();
 
 /* ============ ACTIVITIES (click to open the options popup) ============ */
 function renderActivities(){
@@ -258,13 +279,12 @@ function openCabinModal(){
   if(typeof BUILDINGS === 'undefined' || !BUILDINGS.cabins) return;
   fillCabinModal();
   const cabin = LODGING.find(l => l.key === 'cabin');
-  const u = unitsFor(cabin);
   const note = document.getElementById('cabinNote');
   const confirm = document.getElementById('cabinConfirm');
-  if(note) note.textContent = `Sleeps up to ${cabin.sleeps} per cabin · ${u} cabin${u>1?'s':''} for ${guests} ${guests>1?'people':'person'}`;
-  if(confirm) confirm.textContent = u>1
-    ? `✓ Confirm — ${u} Mini Cabins ($${cabin.rate*u}/night)`
-    : `✓ Confirm — Mini Cabin ($${cabin.rate}/night)`;
+  if(note) note.textContent = guests > cabin.sleeps
+    ? `⚠ Each cabin sleeps ${cabin.sleeps} — you'll need ${Math.ceil(guests/cabin.sleeps)} for ${guests} people.`
+    : `Sleeps up to ${cabin.sleeps} per cabin.`;
+  if(confirm) confirm.textContent = `✓ Add a Mini Cabin ($${cabin.rate}/night)`;
   cabinBackdrop.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -279,15 +299,17 @@ if(cabinBackdrop){
   cabinBackdrop.addEventListener('click', e => { if(e.target===cabinBackdrop) closeCabinModal(); });
   document.addEventListener('keydown', e => { if(e.key==='Escape') closeCabinModal(); });
   document.getElementById('cabinConfirm').addEventListener('click', () => {
-    const radio = bkForm.querySelector('input[name="lodging"][value="cabin"]');
-    radio.checked = true;
+    setLodgeQty('cabin', (lodgingQty.cabin || 0) + 1);
     closeCabinModal();
-    updateSummary();
   });
 }
 bkLodging.addEventListener('click', e => {
-  const opt = e.target.closest('.bk-opt[data-modal]');
-  if(opt){ e.preventDefault(); openCabinModal(); }
+  const see = e.target.closest('[data-see]');
+  if(see){ openCabinModal(); return; }
+  const minus = e.target.closest('[data-lminus]');
+  if(minus){ setLodgeQty(minus.dataset.lminus, (lodgingQty[minus.dataset.lminus] || 0) - 1); return; }
+  const plus = e.target.closest('[data-lplus]');
+  if(plus){ setLodgeQty(plus.dataset.lplus, (lodgingQty[plus.dataset.lplus] || 0) + 1); return; }
 });
 
 /* ---- summary + totals ---- */
@@ -303,27 +325,22 @@ function updateNightsHint(){
 }
 function computeTotals(){
   const nights = nightsBetween(bkIn.value, bkOut.value);
-  const lodge  = selectedLodging();
+  const lodgings = selectedLodgings();
   const acts   = selectedActivities();
-  const units  = lodge ? unitsFor(lodge) : 1;
-  const lodgingTotal    = (lodge && nights > 0) ? units * lodge.rate * nights : 0;
+  const lodgingTotal    = nights > 0 ? lodgings.reduce((s,x) => s + x.qty * x.l.rate * nights, 0) : 0;
   const activitiesTotal = acts.reduce((s,a) => s + (a.price || 0), 0);
   const subtotal = lodgingTotal + activitiesTotal;
   const tax = subtotal * TAX_RATE;
-  return { nights, lodge, units, acts, lodgingTotal, subtotal, tax, total: subtotal + tax };
+  return { nights, lodgings, acts, lodgingTotal, subtotal, tax, total: subtotal + tax };
 }
 function updateGuestNote(){
-  const lodge = selectedLodging();
-  if(lodge && lodge.sleeps){
-    const u = unitsFor(lodge);
-    guestNote.textContent = `${u} ${lodge.name}${u>1?'s':''} for ${guests} ${guests>1?'people':'person'} — sleeps up to ${lodge.sleeps} each.`;
-  } else {
-    guestNote.textContent = 'Each Mini Cabin sleeps up to 4 — bigger groups just add cabins.';
-  }
+  guestNote.textContent = guests > 4
+    ? `Heads up: each Mini Cabin sleeps 4 — you'd need ${Math.ceil(guests/4)} cabins for ${guests} people.`
+    : 'Each Mini Cabin sleeps up to 4 people.';
 }
 function buildSummaryHTML(){
   const t = computeTotals();
-  const hasAny = (bkIn.value && bkOut.value && t.nights > 0) || t.lodge || t.acts.length || justStay;
+  const hasAny = (bkIn.value && bkOut.value && t.nights > 0) || t.lodgings.length || t.acts.length || justStay;
   if(!hasAny) return '<p class="bk-empty">Your selections will show up here as you go.</p>';
   const rows = [];
   rows.push(`<div class="bk-srow"><span>Guests</span><b>${guests}</b></div>`);
@@ -331,11 +348,11 @@ function buildSummaryHTML(){
     rows.push(`<div class="bk-srow"><span>Dates</span><b>${prettyDate(bkIn.value)} – ${prettyDate(bkOut.value)}</b></div>`);
     rows.push(`<div class="bk-srow"><span>Nights</span><b>${t.nights}</b></div>`);
   }
-  if(t.lodge){
-    rows.push(`<div class="bk-srow"><span>${t.lodge.name}${t.units>1?` × ${t.units}`:''}</span><b>$${t.lodge.rate}/night${t.units>1?` ea`:''}</b></div>`);
-    if(t.nights > 0)
-      rows.push(`<div class="bk-srow"><span>Lodging (${t.nights} night${t.nights>1?'s':''})</span><b>${money(t.lodgingTotal)}</b></div>`);
-  }
+  t.lodgings.forEach(x => {
+    rows.push(`<div class="bk-srow"><span>${x.l.name}${x.qty>1?` × ${x.qty}`:''}</span><b>$${x.l.rate}/night${x.qty>1?' ea':''}</b></div>`);
+  });
+  if(t.lodgings.length && t.nights > 0)
+    rows.push(`<div class="bk-srow"><span>Lodging (${t.nights} night${t.nights>1?'s':''})</span><b>${money(t.lodgingTotal)}</b></div>`);
   if(t.acts.length)
     rows.push(`<div class="bk-srow bk-acts"><span>Activities</span><b>${t.acts.map(a=>`${a.icon} ${a.name}${a.optionLabel?` (${a.optionLabel})`:''} — ${money(a.price)}`).join('<br>')}</b></div>`);
   else if(justStay)
@@ -359,11 +376,11 @@ bkForm.addEventListener('change', updateSummary);
 function gcalUrl(trip){
   const stamp = iso => iso.replace(/-/g,'');
   const t = computeTotals();
-  const title = `Cedar Creek Basecamp — ${t.lodge.name} stay`;
+  const title = `Cedar Creek Basecamp stay`;
   const details = [
     'Stay at Cedar Creek Hunt & Adventure Basecamp.', '',
     `Guests: ${guests}`,
-    `Lodging: ${t.units>1?`${t.units}× `:''}${t.lodge.name} ($${t.lodge.rate}/night${t.units>1?` each`:''})`,
+    `Lodging: ${t.lodgings.map(x=>`${x.qty}× ${x.l.name} ($${x.l.rate}/night)`).join(', ') || '—'}`,
     `Nights: ${t.nights} (${prettyDate(trip.in)} – ${prettyDate(trip.out)})`,
     `Lodging total: ${money(t.lodgingTotal)}`,
     t.acts.length ? `Activities: ${t.acts.map(a=>`${a.name}${a.optionLabel?` — ${a.optionLabel}`:''} (${money(a.price)})`).join(', ')}` : 'Activities: just the stay',
@@ -386,10 +403,9 @@ bkForm.addEventListener('submit', e => {
   e.preventDefault();
   bkError.hidden = true;
   const nights = nightsBetween(bkIn.value, bkOut.value);
-  const lodge  = selectedLodging();
   if(!bkIn.value || !bkOut.value){ showError('Please pick your dates.'); return; }
   if(nights < 1){ showError('Your check-out date needs to be after your check-in date.'); return; }
-  if(!lodge){ showError('Please choose where you’ll stay.'); return; }
+  if(selectedLodgings().length === 0){ showError('Reserve at least one cabin, RV spot, or campsite.'); return; }
 
   const trip = { in:bkIn.value, out:bkOut.value };
   bkDoneSum.innerHTML = buildSummaryHTML();

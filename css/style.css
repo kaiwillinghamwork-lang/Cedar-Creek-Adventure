@@ -625,8 +625,9 @@
 .left-acts-item small{color:var(--cedar-light);font-size:.72rem;}
 .left-acts-badge{margin-left:6px;color:#7fe39b;font-weight:800;font-size:.62rem;}
 @media(max-width:820px){
-  .left-acts{position:static;margin:12px 14px 0;}
-  .left-acts-menu{max-height:50vh;}
+  /* keep the activities menu pinned at the top on small screens too */
+  .left-acts{top:66px;left:10px;}
+  .left-acts-menu{max-height:60vh;}
 }
 
 /* ===== scheduling "good to know" info ===== */
@@ -654,6 +655,23 @@
 .step-val{min-width:48px;text-align:center;font-size:1.3rem;font-weight:800;color:var(--forest);}
 .cabin-confirm-bar{flex-wrap:wrap;}
 .cabin-note{margin-right:auto;align-self:center;color:var(--muted);font-size:.85rem;font-weight:600;}
+
+/* ===== lodging "how many?" boxes ===== */
+.bk-opt-q{cursor:default;}
+.bk-opt-q.chosen .bk-opt-card{border-color:var(--cedar);background:#fbf4e9;box-shadow:0 6px 18px rgba(179,133,90,.22);}
+.bk-opt-right{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:2px;}
+.bk-opt-see{background:none;border:none;color:var(--cedar);font-weight:700;font-size:.8rem;cursor:pointer;padding:2px 0;font-family:inherit;}
+.bk-opt-see:hover{text-decoration:underline;}
+.bk-opt-thumb[data-see]{cursor:pointer;}
+.bk-opt-warn{display:block;margin-top:6px;color:#a05a2c;font-size:.78rem;font-weight:700;line-height:1.35;}
+.lodge-stepper{display:inline-flex;align-items:center;gap:2px;background:#fff;border:1.5px solid #d8cdb6;border-radius:10px;padding:3px;}
+.lstep{
+  width:34px;height:34px;border:none;border-radius:7px;background:var(--sand);color:var(--forest);
+  font-size:1.25rem;font-weight:800;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;
+  transition:background .15s,color .15s;
+}
+.lstep:hover{background:var(--cedar-light);color:#22160c;}
+.lqty{min-width:34px;text-align:center;font-size:1.1rem;font-weight:800;color:var(--forest);}
 
 .bk-submit{margin-top:24px;width:100%;justify-content:center;}
 .bk-error{margin-top:12px;color:#b5462e;font-weight:600;font-size:.92rem;}
