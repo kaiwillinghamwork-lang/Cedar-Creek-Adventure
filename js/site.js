@@ -16,8 +16,9 @@ function renderSiteChrome(){
   }
 
   const links = [
-    { label:'Home',     href:'index.html' },
-    { label:'About Us', href:'about.html' },
+    { label:'Home',        href:'index.html' },
+    { label:'About Us',    href:'about.html' },
+    { label:'Hammer Camp', href:'hammer-camp.html' },
   ];
 
   function navLinkHTML(l){
@@ -55,7 +56,7 @@ function renderSiteChrome(){
     <p><b>Cedar Creek Hunt &amp; Adventure Basecamp</b></p>
     <p>3928 Cedar Creek Rd · Colville, WA · 28 acres on East Fork Cedar Creek</p>
     <nav class="footer-links">
-      <a href="index.html">Home</a><a href="about.html">About Us</a><a href="schedule.html">Plan a Stay</a><a href="login.html">Log in</a>
+      <a href="index.html">Home</a><a href="about.html">About Us</a><a href="hammer-camp.html">Hammer Camp</a><a href="schedule.html">Plan a Stay</a><a href="login.html">Log in</a>
     </nav>
     <p class="footer-fine">We don't rent beds — we sell the days you'll remember. · Concept renderings, not to scale.</p>
   </footer>`;

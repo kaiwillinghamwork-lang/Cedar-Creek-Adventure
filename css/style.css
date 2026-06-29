@@ -708,6 +708,45 @@
 }
 .camp-week.sel .camp-week-check{background:var(--moss);color:#fff;}
 
+/* ===== Hammer Camp page ===== */
+.camp-hero{
+  position:relative;text-align:center;color:var(--sand);padding:54px 22px 60px;overflow:hidden;
+  background:radial-gradient(ellipse at 50% -10%, rgba(200,146,43,0.28), transparent 60%),
+    linear-gradient(180deg,#0e1a2b 0%, #16263c 60%, #1f3346 100%);
+}
+.camp-hero-logo{
+  width:152px;height:152px;border-radius:50%;object-fit:cover;
+  border:2px solid rgba(200,146,43,.55);box-shadow:0 14px 40px rgba(0,0,0,.55);margin-bottom:4px;
+}
+.camp-hero .kicker{text-transform:uppercase;letter-spacing:3px;font-size:.74rem;color:var(--gold);margin:10px 0 6px;}
+.camp-hero h1{font-size:clamp(2.4rem,6vw,4rem);font-weight:900;letter-spacing:1px;text-shadow:0 4px 24px rgba(0,0,0,.5);}
+.camp-hero p{max-width:680px;margin:16px auto 0;color:#dbe5ef;font-size:1.08rem;line-height:1.6;}
+
+.camp-section{max-width:1100px;margin:0 auto;padding:40px 20px 70px;display:grid;gap:26px;}
+.camp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;}
+.camp-card{background:var(--cream);border-radius:18px;padding:24px 24px 26px;box-shadow:0 18px 44px rgba(0,0,0,.34);}
+.camp-card-head{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+.camp-card-logo{width:58px;height:58px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,146,43,.5);flex-shrink:0;}
+.camp-card-head h2{color:var(--forest);font-size:1.3rem;line-height:1.12;}
+.camp-card-age{color:var(--cedar);font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;}
+.camp-card-desc{color:#4c4338;font-size:.98rem;line-height:1.6;margin-bottom:16px;}
+.camp-includes{list-style:none;display:grid;gap:7px;margin:8px 0 4px;}
+.camp-includes li{position:relative;padding-left:22px;color:#544b3f;font-size:.92rem;}
+.camp-includes li::before{content:"";position:absolute;left:0;top:7px;width:10px;height:10px;border-radius:50%;background:var(--cedar);box-shadow:0 0 0 3px rgba(179,133,90,.22);}
+
+.camp-summary{background:var(--forest-deep);color:var(--sand);border-radius:18px;padding:22px 24px 24px;box-shadow:0 18px 44px rgba(0,0,0,.4);}
+.camp-summary h3{color:var(--cedar-light);font-size:1.2rem;margin-bottom:12px;}
+.camp-sum-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.1);}
+.camp-sum-name{flex:1;min-width:160px;color:#fff;font-weight:600;font-size:.95rem;}
+.camp-cal{color:var(--cedar-light);font-weight:700;font-size:.82rem;text-decoration:none;white-space:nowrap;border:1px solid rgba(212,163,115,.4);border-radius:8px;padding:6px 10px;}
+.camp-cal:hover{background:rgba(200,146,43,.18);}
+.camp-sum-row b{color:var(--gold);font-weight:800;white-space:nowrap;}
+.camp-sum-total{display:flex;justify-content:space-between;align-items:center;padding-top:14px;margin-top:4px;}
+.camp-sum-total span{color:var(--cedar-light);font-weight:700;}
+.camp-sum-total b{color:var(--gold);font-size:1.4rem;}
+.camp-sum-note{color:#9fb3a3;font-size:.82rem;margin-top:12px;line-height:1.5;}
+@media(max-width:560px){ .camp-hero-logo{width:120px;height:120px;} }
+
 .bk-submit{margin-top:24px;width:100%;justify-content:center;}
 .bk-error{margin-top:12px;color:#b5462e;font-weight:600;font-size:.92rem;}
 

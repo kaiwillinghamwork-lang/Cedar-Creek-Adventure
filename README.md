@@ -21,6 +21,8 @@ The page invites visitors to explore the property and the guided trips on offer:
 
 - **Home** (`index.html`) — hero, interactive map, building cards, activities side menu.
 - **About** (`about.html`) — the story and the team (Kai, Mykle, Taylor) with a property photo.
+- **Hammer Camp** (`hammer-camp.html`) — two age-based boys' overnight camps (13–15 and 15–17),
+  week-long sessions June–July, with a per-week "Add to Google Calendar." Logo by Mykle.
 - **Plan a Stay** (`schedule.html`) — the booking flow with a two-month calendar date picker.
   Activities carry prices that add into a subtotal, and tax is applied for the final total.
 - **Log in / Sign up** (`login.html`) — easy account creation, including a "Continue with
