@@ -178,7 +178,7 @@ const ACTIVITIES = [
     season:[[6,15],[7,15]]
   },
   {
-    key:"biggame", icon:"🏔️", price:4500,
+    key:"biggame", icon:"🏔️", options:[{label:"Deer",price:4500},{label:"Elk",price:5500},{label:"Black Bear",price:3500}],
     name:"Archery, Muzzleloader & Rifle Big Game",
     short:"Deer, elk & bear seasons",
     tagline:"Multi-species · Sept–Dec",
@@ -221,7 +221,7 @@ const ACTIVITIES = [
     season:[[9,1],[12,31]]
   },
   {
-    key:"flyfish", icon:"🪰", price:450,
+    key:"flyfish", icon:"🪰", options:[{label:"Half-day",price:450},{label:"Full-day",price:650}],
     name:"Spokane River Fly-Fishing",
     short:"Native redband trout",
     tagline:"Catch & release · selective gear",
@@ -243,7 +243,7 @@ const ACTIVITIES = [
     season:[[5,24],[3,15]]
   },
   {
-    key:"sasquatch", icon:"🦶", price:350,
+    key:"sasquatch", icon:"🦶", options:[{label:"Evening Track-and-Call",price:350},{label:"Half-Day Summit",price:550},{label:"Overnight Expedition",price:850}],
     name:"The Sasquatch Expedition",
     short:"Guided hike & backcountry camp-out",
     tagline:"Bigfoot hike & camp · summer–fall",
@@ -266,7 +266,7 @@ const ACTIVITIES = [
     season:[[6,15],[10,15]]
   },
   {
-    key:"boatrental", icon:"🚤", price:250,
+    key:"boatrental", icon:"🚤", options:[{label:"Half-day",price:250},{label:"Full-day",price:400}],
     name:"Boat Rental",
     short:"Self-guided day on the water",
     tagline:"Rent & go · open water season",
@@ -287,7 +287,7 @@ const ACTIVITIES = [
     season:[[5,1],[10,15]]
   },
   {
-    key:"atvrental", icon:"🏍️", price:200,
+    key:"atvrental", icon:"🏍️", options:[{label:"Half-day",price:200},{label:"Full-day",price:325}],
     name:"4-Wheeler (ATV) Rental",
     short:"Self-guided trail riding",
     tagline:"Rent & ride · spring–fall",
@@ -308,7 +308,7 @@ const ACTIVITIES = [
     season:[[4,1],[11,15]]
   },
   {
-    key:"snowmobilerental", icon:"🛷", price:225,
+    key:"snowmobilerental", icon:"🛷", options:[{label:"Half-day",price:225},{label:"Full-day",price:350}],
     name:"Snowmobile Rental",
     short:"Self-guided winter sledding",
     tagline:"Rent & ride · deep winter",
@@ -329,7 +329,7 @@ const ACTIVITIES = [
     season:[[12,1],[3,15]]
   },
   {
-    key:"kayaking", icon:"🛶", price:75,
+    key:"kayaking", icon:"🛶", options:[{label:"Half-day",price:75},{label:"Full-day",price:120}],
     name:"Kayak & Canoe Rental",
     short:"Self-guided paddling on the water",
     tagline:"Rent & paddle · spring–fall",

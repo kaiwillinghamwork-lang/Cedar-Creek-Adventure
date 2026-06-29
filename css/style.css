@@ -509,6 +509,8 @@
 .bk-act-short{color:#6a6052;font-size:.8rem;}
 .bk-act-main{flex:1;}
 .bk-act-price{margin-left:auto;font-weight:800;color:var(--cedar);font-size:.95rem;white-space:nowrap;align-self:center;}
+.bk-act-opt{margin-left:auto;align-self:center;font:inherit;font-size:.8rem;font-weight:700;color:var(--forest);background:#fff;border:1.5px solid #d8cdb6;border-radius:8px;padding:7px 8px;max-width:170px;cursor:pointer;}
+.bk-act-opt:focus{outline:none;border-color:var(--cedar);box-shadow:0 0 0 3px rgba(179,133,90,.22);}
 .bk-act-none .bk-act-card{border-style:dashed;}
 .bk-act-none .bk-act-price{display:none;}
 

@@ -47,9 +47,17 @@ function selectedLodging(){
 }
 function selectedActivities(){
   if(bkForm.querySelector('input[name="noact"]:checked')) return [];
-  return [...bkForm.querySelectorAll('input[name="act"]:checked')]
-    .map(c => ACTIVITIES.find(a => a.key === c.value))
-    .filter(Boolean);
+  return [...bkForm.querySelectorAll('input[name="act"]:checked')].map(c => {
+    const a = ACTIVITIES.find(x => x.key === c.value);
+    if(!a) return null;
+    let price = a.price || 0, optionLabel = '';
+    if(a.options && a.options.length){
+      const sel = bkForm.querySelector(`.bk-act-opt[data-key="${a.key}"]`);
+      const o = a.options[sel ? +sel.value : 0] || a.options[0];
+      price = o.price; optionLabel = o.label;
+    }
+    return { key:a.key, name:a.name, icon:a.icon, price, optionLabel };
+  }).filter(Boolean);
 }
 
 /* ---- render lodging options ---- */
@@ -75,7 +83,13 @@ bkLodging.innerHTML = LODGING.map(l => {
 
 /* ---- render activity checkboxes (+ "just the stay") ---- */
 bkActsWrap.innerHTML =
-  ACTIVITIES.map(a => `
+  ACTIVITIES.map(a => {
+    const right = (a.options && a.options.length)
+      ? `<select class="bk-act-opt" data-key="${a.key}" aria-label="${a.name} option">`
+          + a.options.map((o,i) => `<option value="${i}">${o.label} — $${o.price.toLocaleString()}</option>`).join('')
+        + `</select>`
+      : `<span class="bk-act-price">$${(a.price||0).toLocaleString()}</span>`;
+    return `
     <label class="bk-act">
       <input type="checkbox" name="act" value="${a.key}">
       <span class="bk-act-card">
@@ -84,9 +98,10 @@ bkActsWrap.innerHTML =
           <span class="bk-act-name">${a.name}</span>
           <span class="bk-act-short">${a.short}</span>
         </span>
-        <span class="bk-act-price">$${(a.price||0).toLocaleString()}</span>
+        ${right}
       </span>
-    </label>`).join('') + `
+    </label>`;
+  }).join('') + `
     <label class="bk-act bk-act-none">
       <input type="checkbox" name="noact" value="none">
       <span class="bk-act-card">
@@ -105,6 +120,9 @@ bkActsWrap.addEventListener('change', e => {
   if(e.target.name === 'act' && e.target.checked) noActBox.checked = false;
   updateSummary();
 });
+// option dropdowns shouldn't toggle the activity checkbox when clicked
+bkActsWrap.querySelectorAll('.bk-act-opt').forEach(sel =>
+  sel.addEventListener('click', e => e.stopPropagation()));
 
 /* ============ MINI CABIN → building modal with Confirm ============ */
 const cabinBackdrop = document.getElementById('backdrop');
@@ -194,7 +212,7 @@ function buildSummaryHTML(){
       rows.push(`<div class="bk-srow"><span>Lodging (${t.nights} night${t.nights>1?'s':''})</span><b>${money(t.lodgingTotal)}</b></div>`);
   }
   if(t.acts.length)
-    rows.push(`<div class="bk-srow bk-acts"><span>Activities</span><b>${t.acts.map(a=>`${a.icon} ${a.name} — ${money(a.price)}`).join('<br>')}</b></div>`);
+    rows.push(`<div class="bk-srow bk-acts"><span>Activities</span><b>${t.acts.map(a=>`${a.icon} ${a.name}${a.optionLabel?` (${a.optionLabel})`:''} — ${money(a.price)}`).join('<br>')}</b></div>`);
   else if(justStay)
     rows.push(`<div class="bk-srow"><span>Activities</span><b>Just the stay</b></div>`);
   if(t.subtotal > 0){
@@ -220,7 +238,7 @@ function gcalUrl(trip){
     `Lodging: ${t.lodge.name} ($${t.lodge.rate}/night)`,
     `Nights: ${t.nights} (${prettyDate(trip.in)} – ${prettyDate(trip.out)})`,
     `Lodging total: ${money(t.lodgingTotal)}`,
-    t.acts.length ? `Activities: ${t.acts.map(a=>`${a.name} (${money(a.price)})`).join(', ')}` : 'Activities: just the stay',
+    t.acts.length ? `Activities: ${t.acts.map(a=>`${a.name}${a.optionLabel?` — ${a.optionLabel}`:''} (${money(a.price)})`).join(', ')}` : 'Activities: just the stay',
     '',
     `Subtotal: ${money(t.subtotal)}`,
     `Tax (${(TAX_RATE*100).toFixed(1)}%): ${money(t.tax)}`,
