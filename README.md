@@ -13,6 +13,9 @@ The page invites visitors to explore the property and the guided trips on offer:
   and the Sasquatch Expedition, each with a day-by-day breakdown and what's included.
 - **Live in-season badges** — activities automatically show "● ACTIVE" when today's date falls
   inside their season.
+- **Plan Your Stay** — pick check-in/check-out dates, choose lodging (Mini Cabin $150/night or
+  RV spot $35/night), select activities (or "just the stay"), and add the whole trip to Google
+  Calendar with one click.
 
 ## Layout & navigation
 
@@ -37,6 +40,7 @@ robots.txt        allows the home page, disallows /preview.html
 css/style.css     all styling for the full site
 js/data.js        content: every building and activity (loaded first)
 js/app.js         behavior: renders cards, wires the map, opens modals
+js/booking.js     "Plan Your Stay" flow + Add-to-Google-Calendar link
 images/           building & activity photos
 ```
 

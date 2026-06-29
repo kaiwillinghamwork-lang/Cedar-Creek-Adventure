@@ -18,9 +18,10 @@
     <span>Cedar Creek Basecamp<small>Colville, Washington</small></span>
   </a>
   <nav class="nav-links" aria-label="Primary">
-    <a href="#map">Map</a>
-    <a href="#browse">Stays</a>
-    <button id="sideToggle" class="nav-cta" aria-label="Open activities menu">☰ Activities</button>
+    <a href="#map" class="nav-collapse">Map</a>
+    <a href="#browse" class="nav-collapse">Stays</a>
+    <button id="sideToggle" aria-label="Open activities menu">☰ Activities</button>
+    <a href="#book" class="nav-cta">📅 Plan a Stay</a>
   </nav>
 </header>
 
@@ -55,8 +56,8 @@
     <span class="chip">🏔️ Your own cabin on the creek</span>
   </div>
   <div class="hero-cta">
-    <a class="btn btn-primary" href="#map">🗺️ Explore the basecamp</a>
-    <a class="btn btn-ghost" href="#browse">See every stay</a>
+    <a class="btn btn-primary" href="#book">📅 Plan your stay</a>
+    <a class="btn btn-ghost" href="#map">Explore the basecamp</a>
   </div>
   <div class="scroll-hint">↓ Explore the basecamp</div>
 </header>
@@ -336,6 +337,63 @@
   </div>
 </div>
 
+<!-- ============ PLAN YOUR STAY (BOOKING) ============ -->
+<section class="book" id="book">
+  <div class="section-head">
+    <h2>Plan Your Stay</h2>
+    <p>Pick your dates, choose where you'll stay, add a few activities — then drop the whole trip onto your calendar.</p>
+  </div>
+
+  <div class="booking-wrap">
+    <form class="booking-form" id="bookingForm" novalidate>
+      <!-- 1 · dates -->
+      <fieldset class="bk-step">
+        <legend><span class="bk-num">1</span> When are you coming?</legend>
+        <div class="bk-dates">
+          <label>Check-in<input type="date" id="bkIn" required></label>
+          <label>Check-out<input type="date" id="bkOut" required></label>
+        </div>
+        <p class="bk-nights" id="bkNights">Pick your dates to see how many nights you'll stay.</p>
+      </fieldset>
+
+      <!-- 2 · lodging -->
+      <fieldset class="bk-step">
+        <legend><span class="bk-num">2</span> Where will you stay?</legend>
+        <div class="bk-lodging" id="bkLodging"></div>
+      </fieldset>
+
+      <!-- 3 · activities -->
+      <fieldset class="bk-step">
+        <legend><span class="bk-num">3</span> What do you want to do?</legend>
+        <p class="bk-help">Pick as many as you like — or choose “just the stay.”</p>
+        <div class="bk-activities" id="bkActivities"></div>
+      </fieldset>
+
+      <button type="submit" class="btn btn-primary bk-submit">Review my trip →</button>
+      <p class="bk-error" id="bkError" role="alert" hidden></p>
+    </form>
+
+    <aside class="booking-summary" id="bkSummary">
+      <h3>Your Trip</h3>
+      <div id="bkSummaryBody"><p class="bk-empty">Your selections will show up here as you go.</p></div>
+    </aside>
+  </div>
+
+  <!-- thank-you panel -->
+  <div class="booking-done" id="bkDone" hidden>
+    <div class="bk-done-card">
+      <div class="bk-check">✓</div>
+      <h3>Thanks — your trip is set!</h3>
+      <p class="bk-done-sub">Here's what you picked. Add it to your calendar so you don't miss a thing.</p>
+      <div id="bkDoneSummary"></div>
+      <div class="bk-done-actions">
+        <a id="bkGcal" class="btn btn-primary" href="#" target="_blank" rel="noopener">📅 Add to Google Calendar</a>
+        <button type="button" class="btn btn-ghost" id="bkEdit">← Change my trip</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer>
   <p><b>Cedar Creek Hunt &amp; Adventure Basecamp</b> · 3928 Cedar Creek Rd, Colville, WA · 28 acres on East Fork Cedar Creek</p>
   <p style="margin-top:8px;opacity:.75;">We don't rent beds. We sell the days you'll remember for the rest of your life. · Concept renderings, not to scale.</p>
@@ -343,5 +401,6 @@
 
 <script src="js/data.js"></script>
 <script src="js/app.js"></script>
+<script src="js/booking.js"></script>
 </body>
 </html>
