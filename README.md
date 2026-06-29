@@ -21,14 +21,28 @@ The page invites visitors to explore the property and the guided trips on offer:
 - Fully responsive, with a mobile-tuned layout and tap-friendly targets.
 - Accessible: ARIA roles, keyboard-operable map hotspots, focus trapping in modals.
 
+## Project structure
+
+```
+index.html       markup + the interactive SVG site map
+css/style.css     all styling
+js/data.js        content: every building and activity (loaded first)
+js/app.js         behavior: renders cards, wires the map, opens modals
+images/           building & activity photos
+```
+
+`data.js` is where you edit what a building or trip *says*; `app.js` is the behavior.
+
 ## Running it
 
-It's a single self-contained `index.html` (HTML + CSS + JS inline, images embedded). Just open
-the file in a browser, or serve the folder with any static server:
+Because the page loads `css/`, `js/`, and `images/` as separate files, open it through a local
+server rather than the bare file:// path:
 
 ```bash
 npx serve .
 ```
+
+Then visit the printed URL.
 
 ## Tech
 
