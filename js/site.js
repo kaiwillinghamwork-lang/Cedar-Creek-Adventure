@@ -56,7 +56,6 @@ const SB_ITEMS = [
   { label:'Activities',href:'index.html#activities',icon:'activities' },
   { label:'About Us',  href:'about.html',          icon:'about' },
   { label:'Contact',   href:'index.html#visit',    icon:'contact' },
-  { label:'Log in',    href:'login.html',          icon:'login' },
 ];
 
 function renderSiteChrome(){
@@ -71,8 +70,6 @@ function renderSiteChrome(){
 
   const links = [
     { label:'Home',        href:'index.html' },
-    { label:'About',       href:'about.html' },
-    { label:'Explore',     href:'explore.html' },
     { label:'Hammer Camp', href:'hammer-camp.html' },
   ];
 
@@ -146,9 +143,12 @@ function renderSiteChrome(){
       return `<a class="sb-item${active}" href="${it.href}">${sbIcon(it.icon)}<span>${it.label}</span></a>`;
     }).join('') +
     `</div>
-     <div class="sb-account">
-       <span class="sb-avatar">${acct.letter}</span>
-       <span class="sb-acct-text"><b>${acct.name}</b><small>${acct.sub}</small></span>
+     <div class="sb-bottom">
+       <div class="sb-account">
+         <span class="sb-avatar">${acct.letter}</span>
+         <span class="sb-acct-text"><b>${acct.name}</b><small>${acct.sub}</small></span>
+       </div>
+       <a class="sb-item sb-login${page==='login.html'?' active':''}" href="login.html">${sbIcon('login')}<span>Log in</span></a>
      </div>`;
   let sb = document.getElementById('sidebar');
   if(!sb){
