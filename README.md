@@ -17,27 +17,48 @@ The page invites visitors to explore the property and the guided trips on offer:
   RV spot $35/night), select activities (or "just the stay"), and add the whole trip to Google
   Calendar with one click.
 
+## Pages
+
+- **Home** (`index.html`) — hero, interactive map, building cards, activities side menu.
+- **About** (`about.html`) — the story and the team (Kai, Mykle, Taylor) with a property photo.
+- **Plan a Stay** (`schedule.html`) — the booking flow with a two-month calendar date picker.
+- **Log in / Sign up** (`login.html`) — easy account creation (demo auth, see note below).
+
 ## Layout & navigation
 
-- Sticky top navigation bar with brand and jump links (Map · Stays · Activities).
-- Hero call-to-action buttons.
+- Shared logo nav + footer on every page (built by `js/site.js`), using the circular crest logo.
+- Two-month, flip-through calendar date-range picker on the scheduling page.
+- The Mini Cabin lodging option opens the same building modal as the map, with a Confirm button.
 - Fully responsive, with a mobile-tuned layout and tap-friendly targets.
 - Accessible: ARIA roles, keyboard-operable map hotspots, focus trapping in modals.
 
 ## Project structure
 
 ```
-index.html        the full interactive site (home page)
+index.html        home — full interactive site
+about.html        About Us page
+schedule.html     Plan Your Stay (calendar + lodging + activities + Google Calendar)
+login.html        log in / sign up
 coming-soon.html  optional pre-launch splash (SEO meta + GA4 placeholder), not linked
 robots.txt        allows crawlers
 css/style.css     all styling
+js/site.js        shared logo header + footer (+ logged-in nav state)
 js/data.js        content: every building and activity (loaded first)
-js/app.js         behavior: renders cards, wires the map, opens modals
-js/booking.js     "Plan Your Stay" flow + Add-to-Google-Calendar link
-images/           building & activity photos
+js/app.js         home behavior: renders cards, wires the map, opens modals
+js/calendar.js    two-month date-range picker (feeds the booking form)
+js/booking.js     Plan Your Stay flow + Mini Cabin modal + Add-to-Google-Calendar
+js/auth.js        login / sign up (localStorage demo)
+images/           logo, building & activity photos, About photo
 ```
 
-`data.js` is where you edit what a building or trip *says*; `app.js` is the behavior.
+`data.js` is where you edit what a building or trip *says*; `app.js` is the home behavior.
+
+## Note on login (important)
+
+`auth.js` is a **front-end-only demo** — accounts are stored in the browser's `localStorage`
+on the visitor's device. It is **not** real security and does not talk to a server. Before
+launch, swap `createUser()` / `signIn()` for a real backend (e.g. Firebase Auth or Supabase);
+the rest of the UI can stay as-is.
 
 ### Optional: show "Coming Soon" instead
 

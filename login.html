@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in or Sign up — Cedar Creek Basecamp</title>
+<link rel="icon" href="images/logo.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-bg">
+
+<div id="siteHeader"></div>
+
+<div class="auth-wrap">
+  <div class="auth-card" id="authCard">
+    <div class="auth-top">
+      <img src="images/logo.png" alt="">
+      <h1>Welcome to the basecamp</h1>
+      <p>Log in or create an account to plan your stay.</p>
+    </div>
+
+    <div id="authForms">
+      <div class="auth-tabs">
+        <button id="tabLogin" class="active" type="button">Log in</button>
+        <button id="tabSignup" type="button">Sign up</button>
+      </div>
+      <div class="auth-body">
+        <!-- LOG IN -->
+        <form id="formLogin">
+          <label for="liEmail">Email</label>
+          <input id="liEmail" type="email" autocomplete="email" placeholder="you@example.com" required>
+          <label for="liPass">Password</label>
+          <input id="liPass" type="password" autocomplete="current-password" placeholder="Your password" required>
+          <button class="btn btn-primary" type="submit">Log in</button>
+        </form>
+
+        <!-- SIGN UP -->
+        <form id="formSignup" hidden>
+          <label for="suName">Name</label>
+          <input id="suName" type="text" autocomplete="name" placeholder="Your name" required>
+          <label for="suEmail">Email</label>
+          <input id="suEmail" type="email" autocomplete="email" placeholder="you@example.com" required>
+          <label for="suPass">Password</label>
+          <input id="suPass" type="password" autocomplete="new-password" placeholder="At least 6 characters" required>
+          <button class="btn btn-primary" type="submit">Create account</button>
+        </form>
+
+        <p id="authMsg" class="auth-msg" hidden></p>
+        <p class="auth-note">Accounts are saved on this device for now (demo). We can connect real, secure sign-in before launch.</p>
+      </div>
+    </div>
+
+    <!-- shown once signed in -->
+    <div class="auth-body signed-in" id="signedIn" hidden>
+      <div class="team-avatar" style="margin:0 auto 14px;">✓</div>
+      <div class="who"></div>
+      <div class="email"></div>
+      <a class="btn btn-primary" href="schedule.html" style="width:100%;justify-content:center;margin-bottom:10px;">📅 Plan your stay</a>
+      <button class="btn btn-ghost" id="signOutBtn" type="button" style="width:100%;justify-content:center;">Log out</button>
+    </div>
+  </div>
+</div>
+
+<div id="siteFooter"></div>
+
+<script src="js/site.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>

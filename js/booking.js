@@ -1,19 +1,20 @@
 /* ============================================================ */
-/* booking.js — "Plan Your Stay" flow.                          */
-/*   1. pick check-in / check-out dates                          */
-/*   2. choose lodging (mini cabin or RV spot)                   */
+/* booking.js — "Plan Your Stay" flow (schedule.html).          */
+/*   1. pick dates with the calendar (calendar.js → #bkIn/#bkOut)*/
+/*   2. choose lodging — Mini Cabin (opens the cabin modal with  */
+/*      a Confirm button) or RV Rental Spot                      */
 /*   3. choose activities (or "just the stay")                   */
-/*   On submit: show a thank-you panel with an                   */
-/*   "Add to Google Calendar" link pre-filled with the trip.     */
-/*   Reads the trip list from ACTIVITIES (data.js).              */
+/*   On finish: a thank-you panel + an "Add to Google Calendar"  */
+/*   link pre-filled with the trip.                              */
+/*   Reads BUILDINGS + ACTIVITIES from data.js.                  */
 /* ============================================================ */
 
-/* ---- lodging options (rate is per night) ---- */
 const LODGING = [
-  { key:'cabin', icon:'🏚️', name:'Mini Cabin',     rate:150, blurb:'Your own warm cabin tucked in the timber.' },
-  { key:'rv',    icon:'🚐', name:'RV Rental Spot',  rate:35,  blurb:'Level pad with power & water for your rig.' },
+  { key:'cabin', name:'Mini Cabin',    rate:150, modal:'cabins',
+    blurb:'Your own warm cabin tucked in the timber.' },
+  { key:'rv',    name:'RV Rental Spot', rate:35,  icon:'🚐',
+    blurb:'Level pad with power & water for your rig.' },
 ];
-
 const LOCATION = '3928 Cedar Creek Rd, Colville, WA';
 
 /* ---- elements ---- */
@@ -30,23 +31,14 @@ const bkDoneSum  = document.getElementById('bkDoneSummary');
 const bkGcal     = document.getElementById('bkGcal');
 
 /* ---- helpers ---- */
-function todayISO(){
-  const d = new Date();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const day = String(d.getDate()).padStart(2,'0');
-  return `${d.getFullYear()}-${m}-${day}`;
-}
-function nightsBetween(inISO, outISO){
-  if(!inISO || !outISO) return 0;
-  const a = new Date(inISO+'T00:00:00');
-  const b = new Date(outISO+'T00:00:00');
-  const n = Math.round((b - a) / 86400000);
+function nightsBetween(a,b){
+  if(!a || !b) return 0;
+  const n = Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00')) / 86400000);
   return n > 0 ? n : 0;
 }
 function prettyDate(iso){
   if(!iso) return '';
-  const d = new Date(iso+'T00:00:00');
-  return d.toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' });
+  return new Date(iso+'T00:00:00').toLocaleDateString(undefined,{ month:'short', day:'numeric', year:'numeric' });
 }
 function selectedLodging(){
   const r = bkForm.querySelector('input[name="lodging"]:checked');
@@ -59,24 +51,28 @@ function selectedActivities(){
     .filter(Boolean);
 }
 
-/* ---- set sensible date minimums ---- */
-bkIn.min = bkOut.min = todayISO();
-
-/* ---- render lodging cards ---- */
-bkLodging.innerHTML = LODGING.map(l => `
-  <label class="bk-opt">
+/* ---- render lodging options ---- */
+bkLodging.innerHTML = LODGING.map(l => {
+  const thumb = l.modal && typeof BUILDINGS !== 'undefined' && BUILDINGS[l.modal]
+    ? `<span class="bk-opt-thumb">${BUILDINGS[l.modal].out}</span>`
+    : `<span class="bk-opt-icon">${l.icon || '🏕️'}</span>`;
+  const cue = l.modal ? `<span class="bk-opt-cue">Tap to see inside →</span>` : '';
+  return `
+  <label class="bk-opt" data-key="${l.key}" ${l.modal?`data-modal="${l.modal}"`:''}>
     <input type="radio" name="lodging" value="${l.key}">
     <span class="bk-opt-card">
-      <span class="bk-opt-icon">${l.icon}</span>
+      ${thumb}
       <span class="bk-opt-main">
         <span class="bk-opt-name">${l.name}</span>
         <span class="bk-opt-blurb">${l.blurb}</span>
+        ${cue}
       </span>
       <span class="bk-opt-price">$${l.rate}<small>/night</small></span>
     </span>
-  </label>`).join('');
+  </label>`;
+}).join('');
 
-/* ---- render activity checkboxes (+ a "just the stay" option) ---- */
+/* ---- render activity checkboxes (+ "just the stay") ---- */
 bkActsWrap.innerHTML =
   ACTIVITIES.map(a => `
     <label class="bk-act">
@@ -100,46 +96,67 @@ bkActsWrap.innerHTML =
       </span>
     </label>`;
 
-/* ---- "just the stay" is mutually exclusive with picking activities ---- */
 const noActBox = bkForm.querySelector('input[name="noact"]');
 bkActsWrap.addEventListener('change', e => {
-  if(e.target.name === 'noact' && e.target.checked){
+  if(e.target.name === 'noact' && e.target.checked)
     bkForm.querySelectorAll('input[name="act"]').forEach(c => c.checked = false);
-  }
-  if(e.target.name === 'act' && e.target.checked){
-    noActBox.checked = false;
-  }
+  if(e.target.name === 'act' && e.target.checked) noActBox.checked = false;
   updateSummary();
 });
 
-/* ---- live summary ---- */
-function buildSummaryHTML(){
-  const nights = nightsBetween(bkIn.value, bkOut.value);
-  const lodge  = selectedLodging();
-  const acts   = selectedActivities();
-  const justStay = !!noActBox.checked;
-  const rows = [];
-
-  if(bkIn.value && bkOut.value && nights > 0){
-    rows.push(`<div class="bk-srow"><span>Dates</span><b>${prettyDate(bkIn.value)} – ${prettyDate(bkOut.value)}</b></div>`);
-    rows.push(`<div class="bk-srow"><span>Nights</span><b>${nights}</b></div>`);
-  }
-  if(lodge){
-    rows.push(`<div class="bk-srow"><span>Lodging</span><b>${lodge.icon} ${lodge.name}</b></div>`);
-    rows.push(`<div class="bk-srow"><span>Rate</span><b>$${lodge.rate}/night</b></div>`);
-  }
-  if(lodge && nights > 0){
-    rows.push(`<div class="bk-srow bk-total"><span>Lodging total</span><b>$${(lodge.rate*nights).toLocaleString()}</b></div>`);
-  }
-  if(acts.length){
-    rows.push(`<div class="bk-srow bk-acts"><span>Activities</span><b>${acts.map(a=>`${a.icon} ${a.name}`).join('<br>')}</b></div>`);
-  } else if(justStay){
-    rows.push(`<div class="bk-srow"><span>Activities</span><b>Just the stay</b></div>`);
-  }
-
-  if(!rows.length) return '<p class="bk-empty">Your selections will show up here as you go.</p>';
-  return rows.join('');
+/* ============ MINI CABIN → building modal with Confirm ============ */
+const cabinBackdrop = document.getElementById('backdrop');
+function fillCabinModal(){
+  const b = BUILDINGS.cabins;
+  document.getElementById('mTitle').textContent = b.name;
+  document.getElementById('mTagline').textContent = b.tagline;
+  const ml = document.getElementById('mMoment');
+  if(b.peak){ ml.textContent = '“'+b.peak+'”'; ml.style.display=''; } else ml.style.display='none';
+  document.getElementById('mDesc').textContent = b.desc;
+  document.getElementById('paneOut').innerHTML = b.out;
+  document.getElementById('paneIn').innerHTML = b.in;
+  document.getElementById('mFeatures').innerHTML = b.features.map(f=>`<li>${f}</li>`).join('');
+  document.getElementById('mStats').innerHTML = b.stats.map(s=>`<div class="stat"><b>${s[1]}</b>${s[0]}</div>`).join('');
+  setCabinView('out');
 }
+function setCabinView(v){
+  const isOut = v==='out';
+  document.getElementById('tabOut').classList.toggle('active', isOut);
+  document.getElementById('tabIn').classList.toggle('active', !isOut);
+  document.getElementById('paneOut').classList.toggle('active', isOut);
+  document.getElementById('paneIn').classList.toggle('active', !isOut);
+}
+function openCabinModal(){
+  if(typeof BUILDINGS === 'undefined' || !BUILDINGS.cabins) return;
+  fillCabinModal();
+  cabinBackdrop.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeCabinModal(){
+  cabinBackdrop.classList.remove('open');
+  document.body.style.overflow = '';
+}
+if(cabinBackdrop){
+  document.getElementById('tabOut').addEventListener('click', () => setCabinView('out'));
+  document.getElementById('tabIn').addEventListener('click', () => setCabinView('in'));
+  document.getElementById('closeBtn').addEventListener('click', closeCabinModal);
+  cabinBackdrop.addEventListener('click', e => { if(e.target===cabinBackdrop) closeCabinModal(); });
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeCabinModal(); });
+  // Confirm = choose the Mini Cabin
+  document.getElementById('cabinConfirm').addEventListener('click', () => {
+    const radio = bkForm.querySelector('input[name="lodging"][value="cabin"]');
+    radio.checked = true;
+    closeCabinModal();
+    updateSummary();
+  });
+}
+// clicking the Mini Cabin option opens the modal instead of selecting directly
+bkLodging.addEventListener('click', e => {
+  const opt = e.target.closest('.bk-opt[data-modal]');
+  if(opt){ e.preventDefault(); openCabinModal(); }
+});
+
+/* ---- summary ---- */
 function updateNightsHint(){
   const nights = nightsBetween(bkIn.value, bkOut.value);
   if(bkIn.value && bkOut.value){
@@ -147,76 +164,78 @@ function updateNightsHint(){
       ? `${nights} night${nights>1?'s':''} — ${prettyDate(bkIn.value)} to ${prettyDate(bkOut.value)}.`
       : 'Your check-out date needs to be after check-in.';
   } else {
-    bkNights.textContent = "Pick your dates to see how many nights you'll stay.";
+    bkNights.textContent = 'Pick your dates above to see how many nights you’ll stay.';
   }
+}
+function buildSummaryHTML(){
+  const nights = nightsBetween(bkIn.value, bkOut.value);
+  const lodge  = selectedLodging();
+  const acts   = selectedActivities();
+  const justStay = !!noActBox.checked;
+  const rows = [];
+  if(bkIn.value && bkOut.value && nights > 0){
+    rows.push(`<div class="bk-srow"><span>Dates</span><b>${prettyDate(bkIn.value)} – ${prettyDate(bkOut.value)}</b></div>`);
+    rows.push(`<div class="bk-srow"><span>Nights</span><b>${nights}</b></div>`);
+  }
+  if(lodge){
+    rows.push(`<div class="bk-srow"><span>Lodging</span><b>${lodge.name}</b></div>`);
+    rows.push(`<div class="bk-srow"><span>Rate</span><b>$${lodge.rate}/night</b></div>`);
+  }
+  if(lodge && nights > 0)
+    rows.push(`<div class="bk-srow bk-total"><span>Lodging total</span><b>$${(lodge.rate*nights).toLocaleString()}</b></div>`);
+  if(acts.length)
+    rows.push(`<div class="bk-srow bk-acts"><span>Activities</span><b>${acts.map(a=>`${a.icon} ${a.name}`).join('<br>')}</b></div>`);
+  else if(justStay)
+    rows.push(`<div class="bk-srow"><span>Activities</span><b>Just the stay</b></div>`);
+  return rows.length ? rows.join('') : '<p class="bk-empty">Your selections will show up here as you go.</p>';
 }
 function updateSummary(){
   updateNightsHint();
   bkSummary.innerHTML = buildSummaryHTML();
 }
 bkForm.addEventListener('change', updateSummary);
-bkForm.addEventListener('input', updateSummary);
-
-/* keep check-out at or after check-in */
-bkIn.addEventListener('change', () => {
-  bkOut.min = bkIn.value || todayISO();
-  if(bkOut.value && bkOut.value < bkIn.value) bkOut.value = '';
-  updateSummary();
-});
 
 /* ---- Google Calendar link ---- */
 function gcalUrl(trip){
-  const stamp = iso => iso.replace(/-/g,'');           // 2026-07-01 -> 20260701
+  const stamp = iso => iso.replace(/-/g,'');
   const title = `Cedar Creek Basecamp — ${trip.lodge.name} stay`;
-  const detailLines = [
-    `Stay at Cedar Creek Hunt & Adventure Basecamp.`,
-    ``,
+  const details = [
+    'Stay at Cedar Creek Hunt & Adventure Basecamp.', '',
     `Lodging: ${trip.lodge.name} ($${trip.lodge.rate}/night)`,
     `Nights: ${trip.nights} (${prettyDate(trip.in)} – ${prettyDate(trip.out)})`,
     `Lodging total: $${(trip.lodge.rate*trip.nights).toLocaleString()}`,
-    trip.acts.length
-      ? `Activities: ${trip.acts.map(a=>a.name).join(', ')}`
-      : `Activities: just the stay`,
-  ];
+    trip.acts.length ? `Activities: ${trip.acts.map(a=>a.name).join(', ')}` : 'Activities: just the stay',
+  ].join('\n');
   const params = new URLSearchParams({
-    action: 'TEMPLATE',
-    text: title,
-    dates: `${stamp(trip.in)}/${stamp(trip.out)}`,    // all-day, end is exclusive = check-out
-    details: detailLines.join('\n'),
-    location: LOCATION,
+    action:'TEMPLATE', text:title,
+    dates:`${stamp(trip.in)}/${stamp(trip.out)}`,
+    details, location:LOCATION,
   });
   return 'https://calendar.google.com/calendar/render?' + params.toString();
 }
 
-/* ---- finish: validate, then show the thank-you panel ---- */
-function showError(msg){
-  bkError.textContent = msg;
-  bkError.hidden = false;
-}
+/* ---- finish ---- */
+function showError(msg){ bkError.textContent = msg; bkError.hidden = false; }
 bkForm.addEventListener('submit', e => {
   e.preventDefault();
   bkError.hidden = true;
-
   const nights = nightsBetween(bkIn.value, bkOut.value);
   const lodge  = selectedLodging();
-
-  if(!bkIn.value || !bkOut.value){ showError('Please pick your check-in and check-out dates.'); return; }
+  if(!bkIn.value || !bkOut.value){ showError('Please pick your dates.'); return; }
   if(nights < 1){ showError('Your check-out date needs to be after your check-in date.'); return; }
   if(!lodge){ showError('Please choose where you’ll stay.'); return; }
 
-  const trip = { in: bkIn.value, out: bkOut.value, nights, lodge, acts: selectedActivities() };
-
+  const trip = { in:bkIn.value, out:bkOut.value, nights, lodge, acts:selectedActivities() };
   bkDoneSum.innerHTML = buildSummaryHTML();
   bkGcal.href = gcalUrl(trip);
-
-  bkForm.parentElement.hidden = true;   // hide form + summary
+  bkForm.parentElement.hidden = true;
   bkDone.hidden = false;
   bkDone.scrollIntoView({ behavior:'smooth', block:'start' });
 });
-
-/* ---- "Change my trip" goes back to the form ---- */
 document.getElementById('bkEdit').addEventListener('click', () => {
   bkDone.hidden = true;
   bkForm.parentElement.hidden = false;
   document.getElementById('book').scrollIntoView({ behavior:'smooth', block:'start' });
 });
+
+updateSummary();

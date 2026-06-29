@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan Your Stay — Cedar Creek Basecamp</title>
+<link rel="icon" href="images/logo.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-bg">
+
+<div id="siteHeader"></div>
+
+<!-- ============ PLAN YOUR STAY ============ -->
+<section class="book" id="book">
+  <div class="section-head">
+    <h2>Plan Your Stay</h2>
+    <p>Pick your dates, choose where you'll stay, add a few activities — then drop the whole trip onto your calendar.</p>
+  </div>
+
+  <div class="booking-wrap">
+    <form class="booking-form" id="bookingForm" novalidate>
+      <!-- 1 · dates (calendar) -->
+      <fieldset class="bk-step">
+        <legend><span class="bk-num">1</span> When are you coming?</legend>
+        <button type="button" class="cal-trigger" id="calTrigger">
+          <span id="calTriggerText">Select your dates</span>
+          <span class="cal-trigger-ico">📅</span>
+        </button>
+
+        <div class="cal" id="cal" hidden>
+          <div class="cal-tabs">
+            <button type="button" class="cal-tab active" data-tab="calendar">Calendar</button>
+            <button type="button" class="cal-tab" data-tab="flexible">Flexible dates</button>
+          </div>
+          <div class="cal-range">
+            <span class="cal-range-end" id="calStartLbl">Check-in</span>
+            <span class="cal-arrow">→</span>
+            <span class="cal-range-end" id="calEndLbl">Check-out</span>
+          </div>
+          <div class="cal-months">
+            <button type="button" class="cal-nav prev" id="calPrev" aria-label="Previous month">‹</button>
+            <button type="button" class="cal-nav next" id="calNext" aria-label="Next month">›</button>
+            <div class="cal-grids" id="calGrids"></div>
+          </div>
+          <div class="cal-flex" id="calFlex">
+            <button type="button" class="cal-chip active" data-flex="0">Exact dates</button>
+            <button type="button" class="cal-chip" data-flex="1">± 1 day</button>
+            <button type="button" class="cal-chip" data-flex="2">± 2 days</button>
+            <button type="button" class="cal-chip" data-flex="3">± 3 days</button>
+            <button type="button" class="cal-chip" data-flex="7">± 7 days</button>
+          </div>
+          <div class="cal-actions"><button type="button" class="btn cal-done" id="calDone">Done</button></div>
+        </div>
+
+        <input type="hidden" id="bkIn">
+        <input type="hidden" id="bkOut">
+        <p class="bk-nights" id="bkNights">Pick your dates above to see how many nights you’ll stay.</p>
+      </fieldset>
+
+      <!-- 2 · lodging -->
+      <fieldset class="bk-step">
+        <legend><span class="bk-num">2</span> Where will you stay?</legend>
+        <div class="bk-lodging" id="bkLodging"></div>
+      </fieldset>
+
+      <!-- 3 · activities -->
+      <fieldset class="bk-step">
+        <legend><span class="bk-num">3</span> What do you want to do?</legend>
+        <p class="bk-help">Pick as many as you like — or choose “just the stay.”</p>
+        <div class="bk-activities" id="bkActivities"></div>
+      </fieldset>
+
+      <button type="submit" class="btn btn-primary bk-submit">Review my trip →</button>
+      <p class="bk-error" id="bkError" role="alert" hidden></p>
+    </form>
+
+    <aside class="booking-summary" id="bkSummary">
+      <h3>Your Trip</h3>
+      <div id="bkSummaryBody"><p class="bk-empty">Your selections will show up here as you go.</p></div>
+    </aside>
+  </div>
+
+  <!-- thank-you panel -->
+  <div class="booking-done" id="bkDone" hidden>
+    <div class="bk-done-card">
+      <div class="bk-check">✓</div>
+      <h3>Thanks — your trip is set!</h3>
+      <p class="bk-done-sub">Here's what you picked. Add it to your calendar so you don't miss a thing.</p>
+      <div id="bkDoneSummary"></div>
+      <div class="bk-done-actions">
+        <a id="bkGcal" class="btn btn-primary" href="#" target="_blank" rel="noopener">📅 Add to Google Calendar</a>
+        <button type="button" class="btn btn-ghost" id="bkEdit">← Change my trip</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MINI CABIN MODAL (same menu as the map, + Confirm) ============ -->
+<div class="modal-backdrop" id="backdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="modal-head">
+      <div>
+        <div class="tagline" id="mTagline"></div>
+        <h2 id="mTitle"></h2>
+      </div>
+      <button class="close-btn" id="closeBtn" aria-label="Close">&times;</button>
+    </div>
+    <div class="view-toggle">
+      <button id="tabOut" class="active" data-pane="out">🏔️ Outside View</button>
+      <button id="tabIn" data-pane="in">🛋️ Inside View</button>
+    </div>
+    <div class="view-stage">
+      <div class="view-pane active" id="paneOut"></div>
+      <div class="view-pane" id="paneIn"></div>
+    </div>
+    <div class="modal-body">
+      <p class="moment-line" id="mMoment"></p>
+      <p class="desc" id="mDesc"></p>
+      <div class="feature-title">✦ What this building has</div>
+      <ul class="feature-list" id="mFeatures"></ul>
+      <div class="stat-row" id="mStats"></div>
+    </div>
+    <div class="cabin-confirm-bar">
+      <button type="button" class="btn btn-ghost" id="closeBtn2" onclick="document.getElementById('backdrop').classList.remove('open');document.body.style.overflow='';">Back</button>
+      <button type="button" class="btn btn-primary" id="cabinConfirm">✓ Confirm — Mini Cabin ($150/night)</button>
+    </div>
+  </div>
+</div>
+
+<div id="siteFooter"></div>
+
+<script src="js/site.js"></script>
+<script src="js/data.js"></script>
+<script src="js/calendar.js"></script>
+<script src="js/booking.js"></script>
+</body>
+</html>
