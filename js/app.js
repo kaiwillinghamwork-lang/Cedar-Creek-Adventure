@@ -173,11 +173,10 @@ if(leftActsBtn && leftActsMenu){
     else { leftActsMenu.setAttribute('hidden',''); leftActsBtn.setAttribute('aria-expanded','false'); }
   }
   leftActsBtn.addEventListener('click',e=>{ e.stopPropagation(); toggleLeftActs(); });
-  /* hovering the "Cedar Creek" brand pulls the activities menu up */
+  /* hovering the "Cedar Creek" brand pulls the activities menu up; it then
+     stays open until you pick a trip or click somewhere else */
   const brandHover=document.querySelector('.topnav .brand');
   if(brandHover) brandHover.addEventListener('mouseenter',()=>toggleLeftActs(true));
-  /* close once the cursor leaves the menu area */
-  document.getElementById('leftActs').addEventListener('mouseleave',()=>toggleLeftActs(false));
   leftActsMenu.addEventListener('click',e=>{ const it=e.target.closest('.left-acts-item'); if(it){ openActivity(it.dataset.key); toggleLeftActs(false); } });
   document.addEventListener('click',e=>{ if(!document.getElementById('leftActs').contains(e.target)) toggleLeftActs(false); });
 }
