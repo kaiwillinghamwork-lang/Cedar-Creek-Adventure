@@ -22,7 +22,14 @@ The page invites visitors to explore the property and the guided trips on offer:
 - **Home** (`index.html`) — hero, interactive map, building cards, activities side menu.
 - **About** (`about.html`) — the story and the team (Kai, Mykle, Taylor) with a property photo.
 - **Plan a Stay** (`schedule.html`) — the booking flow with a two-month calendar date picker.
-- **Log in / Sign up** (`login.html`) — easy account creation (demo auth, see note below).
+  Activities carry prices that add into a subtotal, and tax is applied for the final total.
+- **Log in / Sign up** (`login.html`) — easy account creation, including a "Continue with
+  Google" button (demo auth, see note below).
+
+Hovering the logo / brand at the top-left opens the Activities menu on the home page.
+
+Activity prices live in `js/data.js` (the `price` field on each activity) and the tax rate is
+`TAX_RATE` near the top of `js/booking.js` (default ~8.1%) — adjust both to your real numbers.
 
 ## Layout & navigation
 

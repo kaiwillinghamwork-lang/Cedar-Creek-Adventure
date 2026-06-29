@@ -507,7 +507,10 @@
 .bk-act-main{display:flex;flex-direction:column;}
 .bk-act-name{font-weight:700;color:var(--forest);font-size:.96rem;line-height:1.2;}
 .bk-act-short{color:#6a6052;font-size:.8rem;}
+.bk-act-main{flex:1;}
+.bk-act-price{margin-left:auto;font-weight:800;color:var(--cedar);font-size:.95rem;white-space:nowrap;align-self:center;}
 .bk-act-none .bk-act-card{border-style:dashed;}
+.bk-act-none .bk-act-price{display:none;}
 
 .bk-submit{margin-top:24px;width:100%;justify-content:center;}
 .bk-error{margin-top:12px;color:#b5462e;font-weight:600;font-size:.92rem;}
@@ -690,6 +693,7 @@
 .about-hero .kicker{text-transform:uppercase;letter-spacing:4px;font-size:.78rem;color:var(--cedar-light);margin-bottom:12px;}
 .about-hero h1{font-size:clamp(2.1rem,5vw,3.4rem);font-weight:800;max-width:760px;margin:0 auto;text-shadow:0 4px 22px rgba(0,0,0,.45);}
 .about-hero p{max-width:640px;margin:18px auto 0;color:#dfeadf;font-size:1.1rem;}
+.about-hero .about-lede{font-size:1.3rem;font-weight:600;color:#eaf2ea;margin-top:14px;}
 .about-photo{max-width:1000px;margin:-40px auto 0;padding:0 20px;position:relative;z-index:2;}
 .about-photo img{width:100%;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.45);display:block;}
 .about-photo .caption{text-align:center;color:#bcd0c0;font-size:.86rem;margin-top:12px;}
@@ -734,6 +738,14 @@
 .auth-msg.err{background:#fdecea;color:#b5462e;}
 .auth-msg.ok{background:#e8f5ec;color:#2e7d46;}
 .auth-note{margin-top:16px;text-align:center;color:var(--muted);font-size:.78rem;line-height:1.5;}
+.auth-or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:.82rem;margin:18px 0 14px;}
+.auth-or::before,.auth-or::after{content:"";flex:1;height:1px;background:#e0d6c2;}
+.google-btn{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+  background:#fff;border:1.5px solid #dadce0;border-radius:10px;padding:12px 14px;
+  font:inherit;font-weight:600;color:#3c4043;cursor:pointer;transition:background .15s,box-shadow .15s;
+}
+.google-btn:hover{background:#f7f8f8;box-shadow:0 1px 4px rgba(0,0,0,.12);}
 .signed-in{text-align:center;padding:10px 0 6px;}
 .signed-in .who{font-size:1.25rem;font-weight:800;color:var(--forest);}
 .signed-in .email{color:var(--muted);font-size:.9rem;margin:2px 0 18px;}

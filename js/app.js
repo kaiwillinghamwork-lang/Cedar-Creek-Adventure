@@ -147,6 +147,9 @@ function closeSideMenu(){sideMenu.classList.remove('open');sideOverlay.classList
 document.getElementById('sideToggle').addEventListener('click',openSideMenu);
 document.getElementById('closeSide').addEventListener('click',closeSideMenu);
 sideOverlay.addEventListener('click',closeSideMenu);
+/* hovering the brand (top-left "Cedar Creek") pops the activities menu open */
+const brandEl=document.querySelector('.topnav .brand');
+if(brandEl) brandEl.addEventListener('mouseenter',openSideMenu);
 
 /* ---- activity deep-dive modal ---- */
 const actBackdrop=document.getElementById('actBackdrop');

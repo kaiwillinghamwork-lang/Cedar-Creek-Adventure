@@ -38,7 +38,16 @@ const Auth = (() => {
 
   function signOut(){ localStorage.removeItem(SESSION); }
 
-  return { currentUser, createUser, signIn, signOut };
+  /* DEMO Google sign-in. Real "Sign in with Google" needs Google Identity
+     Services + an OAuth client ID and an authorized origin (see README).
+     This just creates a local session so the flow works today. */
+  function googleDemo({ name, email }){
+    email = (email || 'guest@gmail.com').trim().toLowerCase();
+    name = name || email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Google User';
+    localStorage.setItem(SESSION, JSON.stringify({ name, email, via:'google' }));
+  }
+
+  return { currentUser, createUser, signIn, signOut, googleDemo };
 })();
 
 /* ---- wire up the login page UI (only runs if the form exists) ---- */
@@ -105,6 +114,13 @@ const Auth = (() => {
 
   document.getElementById('signOutBtn').addEventListener('click', () => {
     Auth.signOut(); renderSignedIn(); showTab('login');
+  });
+
+  const googleBtn = document.getElementById('googleBtn');
+  if(googleBtn) googleBtn.addEventListener('click', () => {
+    const typed = (document.getElementById('liEmail').value || document.getElementById('suEmail').value || '').trim();
+    Auth.googleDemo({ email: typed });
+    renderSignedIn();
   });
 
   renderSignedIn();

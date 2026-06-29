@@ -17,7 +17,7 @@ function renderSiteChrome(){
 
   const links = [
     { label:'Home',     href:'index.html' },
-    { label:'About',    href:'about.html' },
+    { label:'About Us', href:'about.html' },
   ];
 
   function navLinkHTML(l){
@@ -38,7 +38,7 @@ function renderSiteChrome(){
   const headerHTML = `
   <header class="topnav">
     <a class="brand" href="index.html">
-      <img src="images/logo.png" alt="" class="brand-logo">
+      <img src="images/logo.jpg" alt="" class="brand-logo">
       <span class="brand-text">Cedar Creek<small>Hunt &amp; Adventure Basecamp</small></span>
     </a>
     <nav class="nav-links" aria-label="Primary">
@@ -51,11 +51,11 @@ function renderSiteChrome(){
 
   const footerHTML = `
   <footer class="site-footer">
-    <img src="images/logo.png" alt="" class="footer-logo">
+    <img src="images/logo.jpg" alt="" class="footer-logo">
     <p><b>Cedar Creek Hunt &amp; Adventure Basecamp</b></p>
     <p>3928 Cedar Creek Rd · Colville, WA · 28 acres on East Fork Cedar Creek</p>
     <nav class="footer-links">
-      <a href="index.html">Home</a><a href="about.html">About</a><a href="schedule.html">Plan a Stay</a><a href="login.html">Log in</a>
+      <a href="index.html">Home</a><a href="about.html">About Us</a><a href="schedule.html">Plan a Stay</a><a href="login.html">Log in</a>
     </nav>
     <p class="footer-fine">We don't rent beds — we sell the days you'll remember. · Concept renderings, not to scale.</p>
   </footer>`;

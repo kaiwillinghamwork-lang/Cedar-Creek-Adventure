@@ -16,6 +16,7 @@ const LODGING = [
     blurb:'Level pad with power & water for your rig.' },
 ];
 const LOCATION = '3928 Cedar Creek Rd, Colville, WA';
+const TAX_RATE = 0.081;   // ~8.1% (Colville, WA) — change to your real rate
 
 /* ---- elements ---- */
 const bkForm     = document.getElementById('bookingForm');
@@ -83,6 +84,7 @@ bkActsWrap.innerHTML =
           <span class="bk-act-name">${a.name}</span>
           <span class="bk-act-short">${a.short}</span>
         </span>
+        <span class="bk-act-price">$${(a.price||0).toLocaleString()}</span>
       </span>
     </label>`).join('') + `
     <label class="bk-act bk-act-none">
@@ -167,26 +169,39 @@ function updateNightsHint(){
     bkNights.textContent = 'Pick your dates above to see how many nights you’ll stay.';
   }
 }
-function buildSummaryHTML(){
+function money(n){ return '$' + Math.round(n).toLocaleString(); }
+function computeTotals(){
   const nights = nightsBetween(bkIn.value, bkOut.value);
   const lodge  = selectedLodging();
   const acts   = selectedActivities();
+  const lodgingTotal    = (lodge && nights > 0) ? lodge.rate * nights : 0;
+  const activitiesTotal = acts.reduce((s,a) => s + (a.price || 0), 0);
+  const subtotal = lodgingTotal + activitiesTotal;
+  const tax = subtotal * TAX_RATE;
+  return { nights, lodge, acts, lodgingTotal, activitiesTotal, subtotal, tax, total: subtotal + tax };
+}
+function buildSummaryHTML(){
+  const t = computeTotals();
   const justStay = !!noActBox.checked;
   const rows = [];
-  if(bkIn.value && bkOut.value && nights > 0){
+  if(bkIn.value && bkOut.value && t.nights > 0){
     rows.push(`<div class="bk-srow"><span>Dates</span><b>${prettyDate(bkIn.value)} – ${prettyDate(bkOut.value)}</b></div>`);
-    rows.push(`<div class="bk-srow"><span>Nights</span><b>${nights}</b></div>`);
+    rows.push(`<div class="bk-srow"><span>Nights</span><b>${t.nights}</b></div>`);
   }
-  if(lodge){
-    rows.push(`<div class="bk-srow"><span>Lodging</span><b>${lodge.name}</b></div>`);
-    rows.push(`<div class="bk-srow"><span>Rate</span><b>$${lodge.rate}/night</b></div>`);
+  if(t.lodge){
+    rows.push(`<div class="bk-srow"><span>${t.lodge.name}</span><b>$${t.lodge.rate}/night</b></div>`);
+    if(t.nights > 0)
+      rows.push(`<div class="bk-srow"><span>Lodging (${t.nights} night${t.nights>1?'s':''})</span><b>${money(t.lodgingTotal)}</b></div>`);
   }
-  if(lodge && nights > 0)
-    rows.push(`<div class="bk-srow bk-total"><span>Lodging total</span><b>$${(lodge.rate*nights).toLocaleString()}</b></div>`);
-  if(acts.length)
-    rows.push(`<div class="bk-srow bk-acts"><span>Activities</span><b>${acts.map(a=>`${a.icon} ${a.name}`).join('<br>')}</b></div>`);
+  if(t.acts.length)
+    rows.push(`<div class="bk-srow bk-acts"><span>Activities</span><b>${t.acts.map(a=>`${a.icon} ${a.name} — ${money(a.price)}`).join('<br>')}</b></div>`);
   else if(justStay)
     rows.push(`<div class="bk-srow"><span>Activities</span><b>Just the stay</b></div>`);
+  if(t.subtotal > 0){
+    rows.push(`<div class="bk-srow"><span>Subtotal</span><b>${money(t.subtotal)}</b></div>`);
+    rows.push(`<div class="bk-srow"><span>Tax (${(TAX_RATE*100).toFixed(1)}%)</span><b>${money(t.tax)}</b></div>`);
+    rows.push(`<div class="bk-srow bk-total"><span>Total</span><b>${money(t.total)}</b></div>`);
+  }
   return rows.length ? rows.join('') : '<p class="bk-empty">Your selections will show up here as you go.</p>';
 }
 function updateSummary(){
@@ -198,13 +213,18 @@ bkForm.addEventListener('change', updateSummary);
 /* ---- Google Calendar link ---- */
 function gcalUrl(trip){
   const stamp = iso => iso.replace(/-/g,'');
-  const title = `Cedar Creek Basecamp — ${trip.lodge.name} stay`;
+  const t = computeTotals();
+  const title = `Cedar Creek Basecamp — ${t.lodge.name} stay`;
   const details = [
     'Stay at Cedar Creek Hunt & Adventure Basecamp.', '',
-    `Lodging: ${trip.lodge.name} ($${trip.lodge.rate}/night)`,
-    `Nights: ${trip.nights} (${prettyDate(trip.in)} – ${prettyDate(trip.out)})`,
-    `Lodging total: $${(trip.lodge.rate*trip.nights).toLocaleString()}`,
-    trip.acts.length ? `Activities: ${trip.acts.map(a=>a.name).join(', ')}` : 'Activities: just the stay',
+    `Lodging: ${t.lodge.name} ($${t.lodge.rate}/night)`,
+    `Nights: ${t.nights} (${prettyDate(trip.in)} – ${prettyDate(trip.out)})`,
+    `Lodging total: ${money(t.lodgingTotal)}`,
+    t.acts.length ? `Activities: ${t.acts.map(a=>`${a.name} (${money(a.price)})`).join(', ')}` : 'Activities: just the stay',
+    '',
+    `Subtotal: ${money(t.subtotal)}`,
+    `Tax (${(TAX_RATE*100).toFixed(1)}%): ${money(t.tax)}`,
+    `Total: ${money(t.total)}`,
   ].join('\n');
   const params = new URLSearchParams({
     action:'TEMPLATE', text:title,

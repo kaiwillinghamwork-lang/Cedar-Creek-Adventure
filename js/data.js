@@ -111,7 +111,7 @@ const ORDER=["owners","central","cabins","bathhouse","processing","outdoor","rv"
 /* ============================================================ */
 const ACTIVITIES = [
   {
-    key:"whitetail", icon:"🦌",
+    key:"whitetail", icon:"🦌", price:6500,
     name:"Selkirk Late-Season Whitetail Rut Hunt",
     short:"5-day guided trophy hunt",
     tagline:"Premium 1-on-1 · November rut",
@@ -134,7 +134,7 @@ const ACTIVITIES = [
     season:[[11,1],[11,30]]
   },
   {
-    key:"turkey", icon:"🦃",
+    key:"turkey", icon:"🦃", price:2450,
     name:"NE Washington Merriam's Turkey Double-Header",
     short:"3-day spring gobbler hunt",
     tagline:"2-on-1 · Spring strut, Apr–May",
@@ -156,7 +156,7 @@ const ACTIVITIES = [
     season:[[4,15],[5,31]]
   },
   {
-    key:"charter", icon:"🎣",
+    key:"charter", icon:"🎣", price:3200,
     name:"Walleye & Lake Roosevelt Sturgeon Charter",
     short:"4-day freshwater angling",
     tagline:"Guided boat charter · Jun–Jul",
@@ -178,7 +178,7 @@ const ACTIVITIES = [
     season:[[6,15],[7,15]]
   },
   {
-    key:"biggame", icon:"🏔️",
+    key:"biggame", icon:"🏔️", price:4500,
     name:"Archery, Muzzleloader & Rifle Big Game",
     short:"Deer, elk & bear seasons",
     tagline:"Multi-species · Sept–Dec",
@@ -200,7 +200,7 @@ const ACTIVITIES = [
     season:[[9,1],[12,15]]
   },
   {
-    key:"upland", icon:"🐦",
+    key:"upland", icon:"🐦", price:950,
     name:"Upland Bird Wing-Shooting",
     short:"Grouse, quail & pheasant",
     tagline:"Wing shooting · Sept–Dec",
@@ -221,7 +221,7 @@ const ACTIVITIES = [
     season:[[9,1],[12,31]]
   },
   {
-    key:"flyfish", icon:"🪰",
+    key:"flyfish", icon:"🪰", price:450,
     name:"Spokane River Fly-Fishing",
     short:"Native redband trout",
     tagline:"Catch & release · selective gear",
@@ -243,7 +243,7 @@ const ACTIVITIES = [
     season:[[5,24],[3,15]]
   },
   {
-    key:"sasquatch", icon:"🦶",
+    key:"sasquatch", icon:"🦶", price:350,
     name:"The Sasquatch Expedition",
     short:"Guided hike & backcountry camp-out",
     tagline:"Bigfoot hike & camp · summer–fall",
@@ -266,7 +266,7 @@ const ACTIVITIES = [
     season:[[6,15],[10,15]]
   },
   {
-    key:"boatrental", icon:"🚤",
+    key:"boatrental", icon:"🚤", price:250,
     name:"Boat Rental",
     short:"Self-guided day on the water",
     tagline:"Rent & go · open water season",
@@ -287,7 +287,7 @@ const ACTIVITIES = [
     season:[[5,1],[10,15]]
   },
   {
-    key:"atvrental", icon:"🏍️",
+    key:"atvrental", icon:"🏍️", price:200,
     name:"4-Wheeler (ATV) Rental",
     short:"Self-guided trail riding",
     tagline:"Rent & ride · spring–fall",
@@ -308,7 +308,7 @@ const ACTIVITIES = [
     season:[[4,1],[11,15]]
   },
   {
-    key:"snowmobilerental", icon:"🛷",
+    key:"snowmobilerental", icon:"🛷", price:225,
     name:"Snowmobile Rental",
     short:"Self-guided winter sledding",
     tagline:"Rent & ride · deep winter",
@@ -329,7 +329,7 @@ const ACTIVITIES = [
     season:[[12,1],[3,15]]
   },
   {
-    key:"kayaking", icon:"🛶",
+    key:"kayaking", icon:"🛶", price:75,
     name:"Kayak & Canoe Rental",
     short:"Self-guided paddling on the water",
     tagline:"Rent & paddle · spring–fall",
