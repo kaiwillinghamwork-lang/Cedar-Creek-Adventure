@@ -673,6 +673,27 @@
 .lstep:hover{background:var(--cedar-light);color:#22160c;}
 .lqty{min-width:34px;text-align:center;font-size:1.1rem;font-weight:800;color:var(--forest);}
 
+/* ===== summer camps ===== */
+.bk-optional{color:var(--muted);font-weight:600;font-size:.82rem;text-transform:none;letter-spacing:0;}
+.bk-camps{display:grid;gap:11px;}
+.camp-weeks{display:grid;gap:9px;}
+.camp-week{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;font:inherit;
+  border:2px solid #e2d8c2;border-radius:12px;padding:13px 16px;background:#fff;
+  transition:border-color .15s,box-shadow .15s,transform .12s;
+}
+.camp-week:hover{border-color:var(--cedar-light);transform:translateY(-1px);}
+.camp-week.sel{border-color:var(--moss);background:#e7f6ec;}
+.camp-week-main{display:flex;flex-direction:column;flex:1;min-width:0;}
+.camp-week-dates{font-weight:800;color:var(--forest);font-size:1rem;}
+.camp-week-age{color:var(--cedar);font-weight:700;font-size:.8rem;}
+.camp-week-price{font-weight:800;color:var(--cedar);font-size:1.05rem;white-space:nowrap;}
+.camp-week-check{
+  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:800;flex-shrink:0;background:rgba(122,112,102,.14);color:#6a6052;
+}
+.camp-week.sel .camp-week-check{background:var(--moss);color:#fff;}
+
 .bk-submit{margin-top:24px;width:100%;justify-content:center;}
 .bk-error{margin-top:12px;color:#b5462e;font-weight:600;font-size:.92rem;}
 

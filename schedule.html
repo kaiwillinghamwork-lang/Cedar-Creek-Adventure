@@ -92,6 +92,13 @@
         <div class="bk-activities" id="bkActivities"></div>
       </fieldset>
 
+      <!-- 5 · summer camps -->
+      <fieldset class="bk-step">
+        <legend><span class="bk-num">5</span> Summer camps <span class="bk-optional">(optional)</span></legend>
+        <p class="bk-help">Week-long overnight camps for boys, June–July. Tap a camp to pick your week(s).</p>
+        <div class="bk-camps" id="bkCamps"></div>
+      </fieldset>
+
       <button type="submit" class="btn btn-primary bk-submit">Review my trip →</button>
       <p class="bk-error" id="bkError" role="alert" hidden></p>
     </form>
@@ -164,6 +171,31 @@
       <p class="desc" id="actOptDesc"></p>
       <div class="feature-title">Choose an option</div>
       <div class="act-opt-list" id="actOptList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SUMMER CAMP POPUP (pick your weeks) ============ -->
+<div class="modal-backdrop" id="campBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="campTitle">
+    <div class="modal-head">
+      <div>
+        <div class="tagline" id="campTagline"></div>
+        <h2 id="campTitle"></h2>
+      </div>
+      <button class="close-btn" id="campClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="desc" id="campDesc"></p>
+      <div class="feature-title">✦ What's included</div>
+      <ul class="feature-list" id="campIncludes"></ul>
+      <div class="feature-title" style="margin-top:20px;">📅 Pick your week(s)</div>
+      <p class="bk-help">The age group switches every week — pick the week that fits.</p>
+      <div class="camp-weeks" id="campWeeks"></div>
+    </div>
+    <div class="cabin-confirm-bar">
+      <span class="cabin-note" id="campNote">Week-long overnight · meals included</span>
+      <button type="button" class="btn btn-primary" id="campDone">Done</button>
     </div>
   </div>
 </div>

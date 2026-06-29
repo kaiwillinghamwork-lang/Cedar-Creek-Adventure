@@ -356,3 +356,39 @@ const ACTIVITIES = [
     ]
   }
 ];
+
+/* ============================================================ */
+/* ============ SUMMER CAMPS (weekly, June–July) ============== */
+/*   The age group rotates every week (A = 13–15, B = 15–17).   */
+/* ============================================================ */
+const CAMPS = [
+  {
+    key:"boyscamp", icon:"🪖",
+    name:"Boys' Adventure & Combat Camp",
+    short:"Week-long overnight · ages 13–17",
+    tagline:"Survival, jiu-jitsu & brotherhood · Jun–Jul",
+    price:1200,   // per camper, per week (placeholder — set your real rate)
+    desc:"A week-long overnight camp for boys, built around grit, skill, and brotherhood. It's led by Mykle — a combat veteran — who runs the survival skills and military-style challenges, while Kai, a jiu-jitsu purple belt with 5 years on the mats and 3 years of wrestling, coaches grappling and takedowns. It's a real workout camp and a genuinely fun one: you'll train hard, recover in the wood-fired sauna and cold plunge, and bond with a new crew of friends around the fire. Meals are provided all week, and campers get the run of the property. The age group rotates every week, so everyone trains with their own peers.",
+    includes:[
+      "Survival & military-style training with Mykle (combat veteran)",
+      "Jiu-jitsu & wrestling with Kai (purple belt · 5 yrs BJJ · 3 yrs wrestling)",
+      "Week-long workout camp — push hard, get stronger",
+      "Make new friends and bond — the fun kind of hard",
+      "All meals provided",
+      "Recovery built in: wood-fired sauna & cold plunge",
+      "Run of the property — creek, trails & fire-pit nights"
+    ],
+    ages:{ A:"Ages 13–15", B:"Ages 15–17" },
+    weeks:[
+      { start:"2026-06-01", end:"2026-06-06", label:"Jun 1 – 6",       age:"A" },
+      { start:"2026-06-08", end:"2026-06-13", label:"Jun 8 – 13",      age:"B" },
+      { start:"2026-06-15", end:"2026-06-20", label:"Jun 15 – 20",     age:"A" },
+      { start:"2026-06-22", end:"2026-06-27", label:"Jun 22 – 27",     age:"B" },
+      { start:"2026-06-29", end:"2026-07-04", label:"Jun 29 – Jul 4",  age:"A" },
+      { start:"2026-07-06", end:"2026-07-11", label:"Jul 6 – 11",      age:"B" },
+      { start:"2026-07-13", end:"2026-07-18", label:"Jul 13 – 18",     age:"A" },
+      { start:"2026-07-20", end:"2026-07-25", label:"Jul 20 – 25",     age:"B" },
+      { start:"2026-07-27", end:"2026-08-01", label:"Jul 27 – Aug 1",  age:"A" }
+    ]
+  }
+];

@@ -257,6 +257,97 @@ document.getElementById('actOptClose').addEventListener('click', closeActivityOp
 actOptBackdrop.addEventListener('click', e => { if(e.target === actOptBackdrop) closeActivityOptions(); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeActivityOptions(); });
 
+/* ============ SUMMER CAMPS (pick weeks in a popup) ============ */
+const CAMP_LIST   = (typeof CAMPS !== 'undefined') ? CAMPS : [];
+const bkCamps     = document.getElementById('bkCamps');
+const campBackdrop= document.getElementById('campBackdrop');
+const campWeeksEl = document.getElementById('campWeeks');
+let campSel = {};        // { 'campKey:weekIdx': true }
+let modalCampKey = null;
+
+function selectedCamps(){
+  return Object.keys(campSel).filter(k => campSel[k]).map(k => {
+    const [ck, i] = k.split(':');
+    const c = CAMP_LIST.find(x => x.key === ck);
+    return (c && c.weeks[+i]) ? { camp:c, idx:+i, week:c.weeks[+i] } : null;
+  }).filter(Boolean);
+}
+function renderCamps(){
+  if(!bkCamps) return;
+  bkCamps.innerHTML = CAMP_LIST.map(c => {
+    const n = Object.keys(campSel).filter(k => k.startsWith(c.key+':') && campSel[k]).length;
+    const right = n > 0
+      ? `<span class="bk-act-chosen">${n} week${n>1?'s':''} ✓</span>`
+      : `<span class="bk-act-cta">Choose weeks →</span>`;
+    return `
+    <div class="bk-pick camp-pick${n>0?' chosen':''}" data-camp="${c.key}" role="button" tabindex="0">
+      <span class="bk-act-card">
+        <span class="bk-act-icon">${c.icon}</span>
+        <span class="bk-act-main">
+          <span class="bk-act-name">${c.name}</span>
+          <span class="bk-act-short">${c.short} · $${c.price.toLocaleString()}/week</span>
+        </span>
+        ${right}
+      </span>
+    </div>`;
+  }).join('');
+}
+function renderCampWeeks(c){
+  campWeeksEl.innerHTML = c.weeks.map((w,i) => {
+    const sel = !!campSel[`${c.key}:${i}`];
+    return `
+    <button type="button" class="camp-week${sel?' sel':''}" data-week="${i}">
+      <span class="camp-week-main">
+        <span class="camp-week-dates">${w.label}</span>
+        <span class="camp-week-age">${c.ages[w.age]}</span>
+      </span>
+      <span class="camp-week-price">$${c.price.toLocaleString()}</span>
+      <span class="camp-week-check">${sel?'✓':'+'}</span>
+    </button>`;
+  }).join('');
+}
+function openCampModal(campKey){
+  const c = CAMP_LIST.find(x => x.key === campKey);
+  if(!c) return;
+  modalCampKey = campKey;
+  document.getElementById('campTitle').textContent = c.name;
+  document.getElementById('campTagline').textContent = c.tagline || '';
+  document.getElementById('campDesc').textContent = c.desc || '';
+  document.getElementById('campIncludes').innerHTML = (c.includes||[]).map(i=>`<li>${i}</li>`).join('');
+  renderCampWeeks(c);
+  campBackdrop.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeCampModal(){
+  campBackdrop.classList.remove('open');
+  document.body.style.overflow = '';
+}
+if(bkCamps && campBackdrop){
+  renderCamps();
+  bkCamps.addEventListener('click', e => {
+    const card = e.target.closest('.camp-pick[data-camp]');
+    if(card) openCampModal(card.dataset.camp);
+  });
+  bkCamps.addEventListener('keydown', e => {
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    const card = e.target.closest('.camp-pick[data-camp]');
+    if(card){ e.preventDefault(); openCampModal(card.dataset.camp); }
+  });
+  campWeeksEl.addEventListener('click', e => {
+    const wk = e.target.closest('.camp-week[data-week]');
+    if(!wk || !modalCampKey) return;
+    const k = `${modalCampKey}:${wk.dataset.week}`;
+    campSel[k] = !campSel[k];
+    renderCampWeeks(CAMP_LIST.find(x => x.key === modalCampKey));
+    renderCamps();
+    updateSummary();
+  });
+  document.getElementById('campClose').addEventListener('click', closeCampModal);
+  document.getElementById('campDone').addEventListener('click', closeCampModal);
+  campBackdrop.addEventListener('click', e => { if(e.target === campBackdrop) closeCampModal(); });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeCampModal(); });
+}
+
 /* ============ LODGING INFO POPUP (cabin / RV / campground) ============ */
 const cabinBackdrop = document.getElementById('backdrop');
 let modalLodgeKey = null;
@@ -347,11 +438,13 @@ function computeTotals(){
   const nights = nightsBetween(bkIn.value, bkOut.value);
   const lodgings = selectedLodgings();
   const acts   = selectedActivities();
+  const camps  = selectedCamps();
   const lodgingTotal    = nights > 0 ? lodgings.reduce((s,x) => s + x.qty * x.l.rate * nights, 0) : 0;
   const activitiesTotal = acts.reduce((s,a) => s + (a.price || 0), 0);
-  const subtotal = lodgingTotal + activitiesTotal;
+  const campsTotal      = camps.reduce((s,x) => s + (x.camp.price || 0), 0);
+  const subtotal = lodgingTotal + activitiesTotal + campsTotal;
   const tax = subtotal * TAX_RATE;
-  return { nights, lodgings, acts, lodgingTotal, subtotal, tax, total: subtotal + tax };
+  return { nights, lodgings, acts, camps, lodgingTotal, campsTotal, subtotal, tax, total: subtotal + tax };
 }
 function updateGuestNote(){
   guestNote.textContent = guests > 4
@@ -360,7 +453,7 @@ function updateGuestNote(){
 }
 function buildSummaryHTML(){
   const t = computeTotals();
-  const hasAny = (bkIn.value && bkOut.value && t.nights > 0) || t.lodgings.length || t.acts.length || justStay;
+  const hasAny = (bkIn.value && bkOut.value && t.nights > 0) || t.lodgings.length || t.acts.length || t.camps.length || justStay;
   if(!hasAny) return '<p class="bk-empty">Your selections will show up here as you go.</p>';
   const rows = [];
   rows.push(`<div class="bk-srow"><span>Guests</span><b>${guests}</b></div>`);
@@ -377,6 +470,8 @@ function buildSummaryHTML(){
     rows.push(`<div class="bk-srow bk-acts"><span>Activities</span><b>${t.acts.map(a=>`${a.icon} ${a.name}${a.optionLabel?` (${a.optionLabel})`:''} — ${money(a.price)}`).join('<br>')}</b></div>`);
   else if(justStay)
     rows.push(`<div class="bk-srow"><span>Activities</span><b>Just the stay</b></div>`);
+  if(t.camps.length)
+    rows.push(`<div class="bk-srow bk-acts"><span>Camps</span><b>${t.camps.map(x=>`${x.camp.icon} ${x.week.label} (${x.camp.ages[x.week.age]}) — ${money(x.camp.price)}`).join('<br>')}</b></div>`);
   if(t.subtotal > 0){
     rows.push(`<div class="bk-srow"><span>Subtotal</span><b>${money(t.subtotal)}</b></div>`);
     rows.push(`<div class="bk-srow"><span>Tax (${(TAX_RATE*100).toFixed(1)}%)</span><b>${money(t.tax)}</b></div>`);
@@ -404,11 +499,12 @@ function gcalUrl(trip){
     `Nights: ${t.nights} (${prettyDate(trip.in)} – ${prettyDate(trip.out)})`,
     `Lodging total: ${money(t.lodgingTotal)}`,
     t.acts.length ? `Activities: ${t.acts.map(a=>`${a.name}${a.optionLabel?` — ${a.optionLabel}`:''} (${money(a.price)})`).join(', ')}` : 'Activities: just the stay',
+    t.camps.length ? `Camps: ${t.camps.map(x=>`${x.camp.name} — ${x.week.label} (${x.camp.ages[x.week.age]})`).join(', ')}` : null,
     '',
     `Subtotal: ${money(t.subtotal)}`,
     `Tax (${(TAX_RATE*100).toFixed(1)}%): ${money(t.tax)}`,
     `Total: ${money(t.total)}`,
-  ].join('\n');
+  ].filter(x => x !== null).join('\n');
   const params = new URLSearchParams({
     action:'TEMPLATE', text:title,
     dates:`${stamp(trip.in)}/${stamp(trip.out)}`,
@@ -423,11 +519,24 @@ bkForm.addEventListener('submit', e => {
   e.preventDefault();
   bkError.hidden = true;
   const nights = nightsBetween(bkIn.value, bkOut.value);
-  if(!bkIn.value || !bkOut.value){ showError('Please pick your dates.'); return; }
-  if(nights < 1){ showError('Your check-out date needs to be after your check-in date.'); return; }
-  if(selectedLodgings().length === 0){ showError('Reserve at least one cabin, RV spot, or campsite.'); return; }
+  const lodgings = selectedLodgings();
+  const camps = selectedCamps();
+  const hasStay = !!(bkIn.value && bkOut.value && nights >= 1 && lodgings.length);
 
-  const trip = { in:bkIn.value, out:bkOut.value };
+  if(!hasStay && camps.length === 0){
+    if(!bkIn.value || !bkOut.value){ showError('Pick your dates and a place to stay, or choose a camp week.'); return; }
+    if(nights < 1){ showError('Your check-out date needs to be after your check-in date.'); return; }
+    showError('Reserve a place to stay, or pick a camp week.'); return;
+  }
+
+  // dates for the calendar event (camp-only bookings use the camp's week span)
+  let inISO = bkIn.value, outISO = bkOut.value;
+  if(!hasStay && camps.length && !(inISO && outISO && nights >= 1)){
+    const starts = camps.map(x=>x.week.start).sort();
+    const ends   = camps.map(x=>x.week.end).sort();
+    inISO = starts[0]; outISO = ends[ends.length-1];
+  }
+  const trip = { in:inISO, out:outISO };
   bkDoneSum.innerHTML = buildSummaryHTML();
   bkGcal.href = gcalUrl(trip);
   bkForm.parentElement.hidden = true;
