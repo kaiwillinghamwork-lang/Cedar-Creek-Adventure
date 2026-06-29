@@ -777,6 +777,15 @@
 }
 /* with a real mouse/keyboard, hide the touch controls — use arrow keys */
 @media (hover:hover) and (pointer:fine){ .game-pad,.gp-a{display:none;} }
+/* NPC speech bubble */
+.game-bubble{
+  position:absolute;transform:translate(-50%,-100%);z-index:6;pointer-events:none;
+  max-width:230px;background:#fff;color:#26201a;border:2px solid #2c3e2c;border-radius:12px;
+  padding:9px 12px;font-size:.82rem;line-height:1.35;box-shadow:0 6px 16px rgba(0,0,0,.4);
+}
+.game-bubble::after{content:"";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);border:6px solid transparent;border-top-color:#2c3e2c;}
+.game-bubble::before{content:"";position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border:5px solid transparent;border-top-color:#fff;z-index:1;}
+.bubble-go{display:block;margin-top:5px;color:#3f6b4a;font-weight:800;font-size:.74rem;}
 
 .bk-submit{margin-top:24px;width:100%;justify-content:center;}
 .bk-error{margin-top:12px;color:#b5462e;font-weight:600;font-size:.92rem;}

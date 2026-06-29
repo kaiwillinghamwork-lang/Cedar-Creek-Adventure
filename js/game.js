@@ -60,6 +60,12 @@
     b.cx = (b.tx + b.tw/2)*TILE; b.cy = (b.ty + b.th)*TILE + 6;
   });
 
+  // simple, clear walkways: a straight gravel path from every door to the driveway
+  buildings.forEach(b => {
+    if(b.key==='owners') tline([[b.doorTx,b.doorTy],[28,b.doorTy],[28,24]], 0, pave);
+    else tline([[b.doorTx,b.doorTy],[18,b.doorTy]], 0, pave);
+  });
+
   // trees: standing timber up top & to the NE, leafy borders, light scatter
   const trees = [];
   function addTree(i,j){ if(inB(i,j) && terrain[j][i]==='g' && !solid[j][i]){ solid[j][i]=true; trees.push({x:i*TILE+TILE/2, y:j*TILE+TILE}); } }
@@ -80,6 +86,40 @@
 
   /* ---------- player (starts on the driveway, just south of the bridge) ---------- */
   const player = { x:18.5*TILE, y:8.5*TILE, speed:74, frame:0, anim:0, moving:false };
+
+  /* ---------- NPCs: a guide outside each building ---------- */
+  const NPC_LINES = {
+    central:    "Welcome! This is the Central Lodge — kitchen, dining hall, and the pro-shop are all inside.",
+    owners:     "That's the Owner's Lodge — wood-fired sauna, a creek-cold plunge, and the best views on the property.",
+    cabins:     "These are the cabins — your own warm spot in the timber. Walk over to the lodge and coffee's already on.",
+    bathhouse:  "Hot rainfall showers and heated floors in the bathhouse. Best way to warm up after a cold day out.",
+    processing: "Game Processing & cold storage — we take your harvest from field to freezer right here, no two-hour drive.",
+    storage:    "Storage lot — leave your boat, ATV, or RV up here for the season instead of towing it back and forth.",
+    outdoor:    "The fire pit by the creek — string lights, Adirondack chairs, and where everybody ends up at night.",
+    rv:         "RV pads and tent sites — roll in, light your fire ring, and the whole basecamp's a short walk away.",
+  };
+  const NPC_COLORS = ['#4a7a3a','#7a4a8a','#b5462e','#2c5a8a','#a06a2a','#3a7a7a','#8a5a2a','#5a5a8a'];
+  const npcs = buildings.map((b,idx) => {
+    let nx=b.doorTx+1, ny=b.doorTy;
+    if(!(inB(nx,ny) && !solid[ny][nx])) nx=b.doorTx-1;            // stand just beside the door
+    return { bkey:b.key, line:NPC_LINES[b.key]||`This is ${b.name}.`, x:nx*TILE+TILE/2, y:ny*TILE+TILE, color:NPC_COLORS[idx%NPC_COLORS.length], bob:Math.random()*6 };
+  });
+
+  /* ---------- wildlife ---------- */
+  const birds = [];
+  for(let k=0;k<5;k++) birds.push({ x:Math.random()*WORLD_W, y:6+Math.random()*70, sp:16+Math.random()*16, ph:Math.random()*6 });
+  const critters = [];
+  function addCritter(type,tx,ty){ critters.push({ type, x:tx*TILE, y:ty*TILE, hx:tx*TILE, hy:ty*TILE, t:Math.random()*2.5, dx:0, dy:0, frame:0, fa:0, moving:false }); }
+  addCritter('deer',42,4); addCritter('deer',46,9); addCritter('deer',38,2);
+  addCritter('rabbit',26,19); addCritter('rabbit',13,21); addCritter('rabbit',33,25); addCritter('rabbit',24,12);
+  addCritter('duck',9,7); addCritter('duck',13,7); addCritter('duck',6,7);
+
+  // speech bubble (created once, positioned over the canvas near an NPC)
+  const stage = document.getElementById('gameStage');
+  const bubble = document.createElement('div');
+  bubble.className = 'game-bubble'; bubble.hidden = true;
+  if(stage) stage.appendChild(bubble);
+  let activeNpc = null;
 
   function isSolidPx(px,py){
     const i=(px/TILE)|0, j=(py/TILE)|0;
@@ -156,14 +196,39 @@
     if(player.moving){ player.anim+=dt; if(player.anim>0.16){ player.anim=0; player.frame^=1; } }
     else player.frame=0;
 
-    // nearest building door
+    updateAnimals(dt);
+
+    // nearest building door (for Enter) + nearest NPC (for the speech bubble)
     nearBuilding = null; let best=22*22;
-    for(const b of buildings){ const ddx=player.x-b.cx, ddy=player.y-b.cy, d=ddx*ddx+ddy*ddy; if(d<best){ best=d; nearBuilding=b; } }
-    if(promptEl){
-      if(nearBuilding){ promptEl.hidden=false; promptEl.innerHTML = `▶ <b>${nearBuilding.name}</b> — press Enter`; }
-      else promptEl.hidden=true;
-    }
+    for(const b of buildings){ const dx2=player.x-b.cx, dy2=player.y-b.cy, d=dx2*dx2+dy2*dy2; if(d<best){ best=d; nearBuilding=b; } }
+    activeNpc = null; let bestN=26*26;
+    for(const n of npcs){ const dx2=player.x-n.x, dy2=player.y-(n.y-4), d=dx2*dx2+dy2*dy2; if(d<bestN){ bestN=d; activeNpc=n; } }
+    if(promptEl) promptEl.hidden = true;     // the NPC bubble replaces the old prompt
+    positionBubble();
     updateCam();
+  }
+
+  function updateAnimals(dt){
+    birds.forEach(b=>{ b.x+=b.sp*dt; b.ph+=dt*9; if(b.x>WORLD_W+12){ b.x=-12; b.y=6+Math.random()*70; } });
+    critters.forEach(c=>{
+      c.fa+=dt; if(c.fa>0.18){ c.fa=0; c.frame^=1; }
+      if(c.type==='duck'){ c.bobp=(c.bobp||0)+dt*2; c.moving=false; return; }
+      c.t-=dt;
+      if(c.t<=0){ c.t=1+Math.random()*2.5; const a=Math.random()*6.283; if(Math.random()<0.4){ c.dx=0; c.dy=0; } else { c.dx=Math.cos(a); c.dy=Math.sin(a); } }
+      const sp=(c.type==='rabbit'?28:15)*dt, nx=c.x+c.dx*sp, ny=c.y+c.dy*sp;
+      if(Math.hypot(nx-c.hx,ny-c.hy)<54 && !isSolidPx(nx,ny+4) && nx>6 && ny>6 && nx<WORLD_W-6 && ny<WORLD_H-6){ c.x=nx; c.y=ny; c.moving=!!(c.dx||c.dy); }
+      else { c.dx*=-1; c.dy*=-1; c.moving=false; }
+    });
+  }
+  function positionBubble(){
+    if(!bubble) return;
+    if(activeNpc){
+      bubble.innerHTML = `${activeNpc.line}<span class="bubble-go">▶ Press Enter to go inside</span>`;
+      const scale = canvas.clientWidth / VIEW_W || 1;
+      bubble.style.left = (canvas.offsetLeft + (activeNpc.x - cam.x)*scale) + 'px';
+      bubble.style.top  = (canvas.offsetTop  + (activeNpc.y - 22 - cam.y)*scale) + 'px';
+      bubble.hidden = false;
+    } else bubble.hidden = true;
   }
 
   /* ---------- draw ---------- */
@@ -185,12 +250,58 @@
     flowers.forEach(f=>{ const sx=f.x-cam.x, sy=f.y-cam.y; if(sx>-4&&sy>-4&&sx<VIEW_W&&sy<VIEW_H){ ctx.fillStyle=f.c; ctx.fillRect(sx,sy,2,2); } });
     ctx.restore();
 
-    // depth-sorted objects: buildings, trees, player
+    // depth-sorted objects: buildings, trees, NPCs, critters, player
     const objs = [];
     buildings.forEach(b=> objs.push({ y:(b.ty+b.th)*TILE, draw:()=>drawBuilding(b) }));
     trees.forEach(tr=> objs.push({ y:tr.y, draw:()=>drawTree(tr.x-cam.x, tr.y-cam.y) }));
+    npcs.forEach(n=> objs.push({ y:n.y, draw:()=>drawNpc(n) }));
+    critters.forEach(c=> objs.push({ y:c.y+8, draw:()=>drawCritter(c) }));
     objs.push({ y:player.y, draw:()=>drawPlayer(player.x-cam.x, player.y-cam.y, player.frame, player.moving) });
     objs.sort((a,b)=>a.y-b.y).forEach(o=>o.draw());
+    // birds fly above everything
+    birds.forEach(b=> drawBird(b.x-cam.x, b.y-cam.y, b.ph));
+  }
+
+  function drawNpc(n){
+    const cx=Math.round(n.x-cam.x), by=Math.round(n.y-cam.y);
+    if(cx<-10||cx>VIEW_W+10||by<-22||by>VIEW_H+10) return;
+    const bobY = Math.round(Math.sin(t*2+n.bob)*0.6);
+    const x=cx-5, top=by-16+bobY;
+    ctx.fillStyle='rgba(20,40,20,.25)'; ctx.fillRect(cx-4,by-2,9,3);
+    ctx.fillStyle='#2b2a2a'; ctx.fillRect(x+2,top+13,3,3); ctx.fillRect(x+6,top+13,3,3);  // legs
+    ctx.fillStyle=n.color; ctx.fillRect(x+1,top+8,9,6);                                    // shirt
+    ctx.fillStyle='#f0c69a'; ctx.fillRect(x+3,top+4,5,5);                                  // face
+    ctx.fillStyle='#2a2118'; ctx.fillRect(x+4,top+6,1,1); ctx.fillRect(x+6,top+6,1,1);
+    ctx.fillStyle='#5a3a22'; ctx.fillRect(x+2,top+1,7,3);                                  // hair
+    if(activeNpc!==n){ ctx.fillStyle='#fff'; ctx.fillRect(cx-1,top-4,3,2); ctx.fillStyle='#2c3e2c'; ctx.fillRect(cx,top-3,1,1); }  // "can talk" dot
+  }
+  function drawCritter(c){
+    const x=Math.round(c.x-cam.x), y=Math.round(c.y-cam.y);
+    if(x<-14||x>VIEW_W+14||y<-14||y>VIEW_H+14) return;
+    if(c.type==='deer'){
+      ctx.fillStyle='rgba(20,40,20,.22)'; ctx.fillRect(x-5,y-1,12,2);
+      ctx.fillStyle='#8a5a32'; ctx.fillRect(x-5,y-9,11,6); ctx.fillRect(x+4,y-13,4,5);
+      ctx.fillStyle='#6e4827'; ctx.fillRect(x+7,y-15,1,3); ctx.fillRect(x+5,y-15,1,3);
+      ctx.fillStyle='#5a3a22'; const lb=c.frame?1:0;
+      ctx.fillRect(x-4,y-3,2,3); ctx.fillRect(x+3,y-3,2,3-lb); ctx.fillRect(x-1,y-3,2,2+lb);
+    } else if(c.type==='rabbit'){
+      ctx.fillStyle='rgba(20,40,20,.2)'; ctx.fillRect(x-3,y-1,6,2);
+      ctx.fillStyle='#b9b3a8'; ctx.fillRect(x-3,y-5,6,4); ctx.fillRect(x+1,y-7,2,3);
+      ctx.fillStyle='#cfc9be'; ctx.fillRect(x+2,y-10,1,3); ctx.fillRect(x,y-10,1,3);
+      ctx.fillStyle='#fff'; ctx.fillRect(x-3,y-4,2,2);
+    } else { // duck floating on the creek
+      const bob=Math.round(Math.sin(c.bobp||0));
+      ctx.fillStyle='rgba(255,255,255,.45)'; ctx.fillRect(x-4,y-1,9,2);
+      ctx.fillStyle='#f4f0e6'; ctx.fillRect(x-3,y-5+bob,7,4); ctx.fillRect(x+3,y-8+bob,3,3);
+      ctx.fillStyle='#e0a02a'; ctx.fillRect(x+6,y-7+bob,2,1);
+      ctx.fillStyle='#2a2118'; ctx.fillRect(x+4,y-7+bob,1,1);
+    }
+  }
+  function drawBird(x,y,ph){
+    if(x<-6||x>VIEW_W+6||y<-6||y>VIEW_H) return;
+    ctx.fillStyle='#3a3a3a';
+    if(Math.sin(ph)>0){ ctx.fillRect(x-3,y,2,1); ctx.fillRect(x+1,y,2,1); ctx.fillRect(x-1,y+1,2,1); }
+    else { ctx.fillRect(x-3,y+1,2,1); ctx.fillRect(x+1,y+1,2,1); ctx.fillRect(x-1,y,2,1); }
   }
 
   function drawWater(sx,sy,i,j){
