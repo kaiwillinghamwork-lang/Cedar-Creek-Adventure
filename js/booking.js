@@ -11,12 +11,16 @@
 /* ============================================================ */
 
 const LODGING = [
-  { key:'cabin', name:'Mini Cabin',     rate:150, modal:'cabins', sleeps:4,
-    blurb:'Your own cabin in the timber — sleeps up to 4.' },
-  { key:'rv',    name:'RV Rental Spot',  rate:35,  icon:'🚐',
-    blurb:'Level pad with power & water for your rig.' },
+  { key:'cabin', name:'Mini Cabin',     rate:150, sleeps:4, bld:'cabins',
+    blurb:'Your own cabin in the timber — sleeps up to 4.',
+    info:'A private, insulated cabin with a warm wood stove, a real bed, and a covered porch — walk to the lodge for meals, no cooking or cleanup.' },
+  { key:'rv',    name:'RV Rental Spot',  rate:35,  icon:'🚐', bld:'rv',
+    blurb:'Level pad with power & water for your rig.',
+    info:'A level, pull-through pad with power and water hookups and your own fire ring — steps from the creek, fire pit, and hot showers.' },
   { key:'camp',  name:'Campground',      rate:25,  icon:'⛺',
-    blurb:'Pitch a tent under the pines by the creek.' },
+    blurb:'Pitch a tent under the pines by the creek.',
+    info:'Flat, shaded tent sites under the pines, each with its own fire ring — hot showers at the bathhouse a short walk away.',
+    features:['Flat, shaded tent sites','Your own fire ring','Steps from the creek','Hot showers nearby','Picnic tables'] },
 ];
 const LOCATION = '3928 Cedar Creek Rd, Colville, WA';
 const TAX_RATE = 0.081;   // ~8.1% (Colville, WA) — change to your real rate
@@ -113,20 +117,19 @@ function selectedActivities(){
 function renderLodging(){
   bkLodging.innerHTML = LODGING.map(l => {
     const qty = lodgingQty[l.key] || 0;
-    const thumb = l.modal && typeof BUILDINGS !== 'undefined' && BUILDINGS[l.modal]
-      ? `<span class="bk-opt-thumb" data-see="${l.modal}">${BUILDINGS[l.modal].out}</span>`
-      : `<span class="bk-opt-icon">${l.icon || '🏕️'}</span>`;
-    const see = l.modal ? `<button type="button" class="bk-opt-see" data-see="${l.modal}">See inside →</button>` : '';
+    const b = l.bld && typeof BUILDINGS !== 'undefined' ? BUILDINGS[l.bld] : null;
+    const thumb = b ? `<span class="bk-opt-thumb">${b.out}</span>` : `<span class="bk-opt-icon">${l.icon || '🏕️'}</span>`;
+    const cue = `<span class="bk-opt-cue">Tap for info &amp; to add →</span>`;
     const warn = (l.sleeps && guests > l.sleeps)
       ? `<span class="bk-opt-warn">⚠ Each cabin sleeps ${l.sleeps} — you'll need ${Math.ceil(guests/l.sleeps)} for ${guests} people.</span>` : '';
     return `
-    <div class="bk-opt-q${qty>0?' chosen':''}" data-key="${l.key}">
+    <div class="bk-opt-q${qty>0?' chosen':''}" data-key="${l.key}" role="button" tabindex="0">
       <span class="bk-opt-card">
         ${thumb}
         <span class="bk-opt-main">
           <span class="bk-opt-name">${l.name}</span>
           <span class="bk-opt-blurb">${l.blurb}</span>
-          ${see}
+          ${cue}
           ${warn}
         </span>
         <span class="bk-opt-right">
@@ -215,7 +218,8 @@ function openActivityOptions(key){
   if(!a) return;
   actOptTitle.textContent = a.name;
   actOptTagline.textContent = a.tagline || '';
-  actOptDesc.textContent = a.short || '';
+  const blurb = (a.desc || a.short || '').replace(/\s+/g,' ').trim();
+  actOptDesc.textContent = blurb.length > 220 ? blurb.slice(0,218) + '…' : blurb;
   const opts = (a.options && a.options.length) ? a.options : [{ label:'Book this trip', price:a.price || 0 }];
   actOptList.innerHTML = opts.map((o,i) => `
       <button type="button" class="act-opt-choice${chosen[key]===i?' current':''}" data-key="${key}" data-idx="${i}">
@@ -253,20 +257,26 @@ document.getElementById('actOptClose').addEventListener('click', closeActivityOp
 actOptBackdrop.addEventListener('click', e => { if(e.target === actOptBackdrop) closeActivityOptions(); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeActivityOptions(); });
 
-/* ============ MINI CABIN → building modal with Confirm ============ */
+/* ============ LODGING INFO POPUP (cabin / RV / campground) ============ */
 const cabinBackdrop = document.getElementById('backdrop');
-function fillCabinModal(){
-  const b = BUILDINGS.cabins;
-  document.getElementById('mTitle').textContent = b.name;
-  document.getElementById('mTagline').textContent = b.tagline;
-  const ml = document.getElementById('mMoment');
-  if(b.peak){ ml.textContent = '“'+b.peak+'”'; ml.style.display=''; } else ml.style.display='none';
-  document.getElementById('mDesc').textContent = b.desc;
-  document.getElementById('paneOut').innerHTML = b.out;
-  document.getElementById('paneIn').innerHTML = b.in;
-  document.getElementById('mFeatures').innerHTML = b.features.map(f=>`<li>${f}</li>`).join('');
-  document.getElementById('mStats').innerHTML = b.stats.map(s=>`<div class="stat"><b>${s[1]}</b>${s[0]}</div>`).join('');
-  setCabinView('out');
+let modalLodgeKey = null;
+function fillLodgeModal(key){
+  const l = LODGING.find(x => x.key === key);
+  const b = l.bld && typeof BUILDINGS !== 'undefined' ? BUILDINGS[l.bld] : null;
+  document.getElementById('mTitle').textContent = l.name;
+  document.getElementById('mTagline').textContent = `$${l.rate} / night`;
+  document.getElementById('mMoment').style.display = 'none';
+  document.getElementById('mDesc').textContent = l.info || '';
+  const vt = document.querySelector('.view-toggle'), vs = document.querySelector('.view-stage');
+  if(b){
+    vt.style.display=''; vs.style.display='';
+    document.getElementById('paneOut').innerHTML = b.out;
+    document.getElementById('paneIn').innerHTML = b.in;
+    setCabinView('out');
+  } else { vt.style.display='none'; vs.style.display='none'; }
+  const feats = b ? b.features : (l.features || []);
+  document.getElementById('mFeatures').innerHTML = feats.map(f=>`<li>${f}</li>`).join('');
+  document.getElementById('mStats').innerHTML = '';
 }
 function setCabinView(v){
   const isOut = v==='out';
@@ -275,16 +285,17 @@ function setCabinView(v){
   document.getElementById('paneOut').classList.toggle('active', isOut);
   document.getElementById('paneIn').classList.toggle('active', !isOut);
 }
-function openCabinModal(){
-  if(typeof BUILDINGS === 'undefined' || !BUILDINGS.cabins) return;
-  fillCabinModal();
-  const cabin = LODGING.find(l => l.key === 'cabin');
+function openLodgeModal(key){
+  const l = LODGING.find(x => x.key === key);
+  if(!l) return;
+  modalLodgeKey = key;
+  fillLodgeModal(key);
   const note = document.getElementById('cabinNote');
   const confirm = document.getElementById('cabinConfirm');
-  if(note) note.textContent = guests > cabin.sleeps
-    ? `⚠ Each cabin sleeps ${cabin.sleeps} — you'll need ${Math.ceil(guests/cabin.sleeps)} for ${guests} people.`
-    : `Sleeps up to ${cabin.sleeps} per cabin.`;
-  if(confirm) confirm.textContent = `✓ Add a Mini Cabin ($${cabin.rate}/night)`;
+  if(note) note.textContent = (l.sleeps && guests > l.sleeps)
+    ? `⚠ Each cabin sleeps ${l.sleeps} — you'll need ${Math.ceil(guests/l.sleeps)} for ${guests} people.`
+    : (l.sleeps ? `Sleeps up to ${l.sleeps} per cabin.` : `$${l.rate} per night.`);
+  if(confirm) confirm.textContent = `+ Add another ${l.name}`;
   cabinBackdrop.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -299,17 +310,26 @@ if(cabinBackdrop){
   cabinBackdrop.addEventListener('click', e => { if(e.target===cabinBackdrop) closeCabinModal(); });
   document.addEventListener('keydown', e => { if(e.key==='Escape') closeCabinModal(); });
   document.getElementById('cabinConfirm').addEventListener('click', () => {
-    setLodgeQty('cabin', (lodgingQty.cabin || 0) + 1);
-    closeCabinModal();
+    if(modalLodgeKey) setLodgeQty(modalLodgeKey, (lodgingQty[modalLodgeKey] || 0) + 1);
   });
 }
+/* clicking a place auto-reserves 1 and opens its info popup; +/- adjusts the count */
 bkLodging.addEventListener('click', e => {
-  const see = e.target.closest('[data-see]');
-  if(see){ openCabinModal(); return; }
   const minus = e.target.closest('[data-lminus]');
   if(minus){ setLodgeQty(minus.dataset.lminus, (lodgingQty[minus.dataset.lminus] || 0) - 1); return; }
   const plus = e.target.closest('[data-lplus]');
   if(plus){ setLodgeQty(plus.dataset.lplus, (lodgingQty[plus.dataset.lplus] || 0) + 1); return; }
+  const card = e.target.closest('.bk-opt-q[data-key]');
+  if(card){
+    const key = card.dataset.key;
+    setLodgeQty(key, Math.max(1, lodgingQty[key] || 0));   // auto-pick 1
+    openLodgeModal(key);
+  }
+});
+bkLodging.addEventListener('keydown', e => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const card = e.target.closest('.bk-opt-q[data-key]');
+  if(card){ e.preventDefault(); const key=card.dataset.key; setLodgeQty(key, Math.max(1, lodgingQty[key]||0)); openLodgeModal(key); }
 });
 
 /* ---- summary + totals ---- */
