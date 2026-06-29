@@ -641,6 +641,20 @@
 .bk-info-card b{display:block;color:var(--cedar-light);margin-bottom:3px;font-size:.95rem;}
 .bk-info-card span{font-size:.86rem;color:#cfe0d2;line-height:1.5;}
 
+/* ===== party-size stepper ===== */
+.bk-guests{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.bk-guests-label{font-weight:700;color:var(--forest);font-size:1.05rem;}
+.stepper{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1.5px solid #d8cdb6;border-radius:12px;padding:4px;}
+.step-btn{
+  width:42px;height:42px;border:none;border-radius:9px;background:var(--sand);color:var(--forest);
+  font-size:1.5rem;font-weight:800;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;
+  transition:background .15s,color .15s;
+}
+.step-btn:hover{background:var(--cedar-light);color:#22160c;}
+.step-val{min-width:48px;text-align:center;font-size:1.3rem;font-weight:800;color:var(--forest);}
+.cabin-confirm-bar{flex-wrap:wrap;}
+.cabin-note{margin-right:auto;align-self:center;color:var(--muted);font-size:.85rem;font-weight:600;}
+
 .bk-submit{margin-top:24px;width:100%;justify-content:center;}
 .bk-error{margin-top:12px;color:#b5462e;font-weight:600;font-size:.92rem;}
 

@@ -11,8 +11,8 @@
 /* ============================================================ */
 
 const LODGING = [
-  { key:'cabin', name:'Mini Cabin',     rate:150, modal:'cabins',
-    blurb:'Your own warm cabin tucked in the timber.' },
+  { key:'cabin', name:'Mini Cabin',     rate:150, modal:'cabins', sleeps:4,
+    blurb:'Your own cabin in the timber — sleeps up to 4.' },
   { key:'rv',    name:'RV Rental Spot',  rate:35,  icon:'🚐',
     blurb:'Level pad with power & water for your rig.' },
   { key:'camp',  name:'Campground',      rate:25,  icon:'⛺',
@@ -33,6 +33,17 @@ const bkError    = document.getElementById('bkError');
 const bkDone     = document.getElementById('bkDone');
 const bkDoneSum  = document.getElementById('bkDoneSummary');
 const bkGcal     = document.getElementById('bkGcal');
+const guestVal   = document.getElementById('guestVal');
+const guestNote  = document.getElementById('guestNote');
+
+/* ---- party-size stepper ---- */
+function setGuests(n){
+  guests = Math.max(1, Math.min(20, n));
+  guestVal.textContent = guests;
+  updateSummary();
+}
+document.getElementById('guestMinus').addEventListener('click', () => setGuests(guests - 1));
+document.getElementById('guestPlus').addEventListener('click', () => setGuests(guests + 1));
 
 /* activity-options popup */
 const actOptBackdrop = document.getElementById('actOptBackdrop');
@@ -45,6 +56,9 @@ const actOptList     = document.getElementById('actOptList');
 let chosen = {};       // { activityKey: optionIndex }
 let justStay = false;  // "no activities — just the stay"
 let justAdded = null;  // key of the activity just added (for a one-shot pop animation)
+let guests = 2;        // number of people coming
+
+function unitsFor(lodge){ return (lodge && lodge.sleeps) ? Math.ceil(guests / lodge.sleeps) : 1; }
 
 /* ---- helpers ---- */
 function nightsBetween(a,b){
@@ -243,6 +257,14 @@ function setCabinView(v){
 function openCabinModal(){
   if(typeof BUILDINGS === 'undefined' || !BUILDINGS.cabins) return;
   fillCabinModal();
+  const cabin = LODGING.find(l => l.key === 'cabin');
+  const u = unitsFor(cabin);
+  const note = document.getElementById('cabinNote');
+  const confirm = document.getElementById('cabinConfirm');
+  if(note) note.textContent = `Sleeps up to ${cabin.sleeps} per cabin · ${u} cabin${u>1?'s':''} for ${guests} ${guests>1?'people':'person'}`;
+  if(confirm) confirm.textContent = u>1
+    ? `✓ Confirm — ${u} Mini Cabins ($${cabin.rate*u}/night)`
+    : `✓ Confirm — Mini Cabin ($${cabin.rate}/night)`;
   cabinBackdrop.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -283,21 +305,34 @@ function computeTotals(){
   const nights = nightsBetween(bkIn.value, bkOut.value);
   const lodge  = selectedLodging();
   const acts   = selectedActivities();
-  const lodgingTotal    = (lodge && nights > 0) ? lodge.rate * nights : 0;
+  const units  = lodge ? unitsFor(lodge) : 1;
+  const lodgingTotal    = (lodge && nights > 0) ? units * lodge.rate * nights : 0;
   const activitiesTotal = acts.reduce((s,a) => s + (a.price || 0), 0);
   const subtotal = lodgingTotal + activitiesTotal;
   const tax = subtotal * TAX_RATE;
-  return { nights, lodge, acts, lodgingTotal, subtotal, tax, total: subtotal + tax };
+  return { nights, lodge, units, acts, lodgingTotal, subtotal, tax, total: subtotal + tax };
+}
+function updateGuestNote(){
+  const lodge = selectedLodging();
+  if(lodge && lodge.sleeps){
+    const u = unitsFor(lodge);
+    guestNote.textContent = `${u} ${lodge.name}${u>1?'s':''} for ${guests} ${guests>1?'people':'person'} — sleeps up to ${lodge.sleeps} each.`;
+  } else {
+    guestNote.textContent = 'Each Mini Cabin sleeps up to 4 — bigger groups just add cabins.';
+  }
 }
 function buildSummaryHTML(){
   const t = computeTotals();
+  const hasAny = (bkIn.value && bkOut.value && t.nights > 0) || t.lodge || t.acts.length || justStay;
+  if(!hasAny) return '<p class="bk-empty">Your selections will show up here as you go.</p>';
   const rows = [];
+  rows.push(`<div class="bk-srow"><span>Guests</span><b>${guests}</b></div>`);
   if(bkIn.value && bkOut.value && t.nights > 0){
     rows.push(`<div class="bk-srow"><span>Dates</span><b>${prettyDate(bkIn.value)} – ${prettyDate(bkOut.value)}</b></div>`);
     rows.push(`<div class="bk-srow"><span>Nights</span><b>${t.nights}</b></div>`);
   }
   if(t.lodge){
-    rows.push(`<div class="bk-srow"><span>${t.lodge.name}</span><b>$${t.lodge.rate}/night</b></div>`);
+    rows.push(`<div class="bk-srow"><span>${t.lodge.name}${t.units>1?` × ${t.units}`:''}</span><b>$${t.lodge.rate}/night${t.units>1?` ea`:''}</b></div>`);
     if(t.nights > 0)
       rows.push(`<div class="bk-srow"><span>Lodging (${t.nights} night${t.nights>1?'s':''})</span><b>${money(t.lodgingTotal)}</b></div>`);
   }
@@ -314,6 +349,7 @@ function buildSummaryHTML(){
 }
 function updateSummary(){
   updateNightsHint();
+  updateGuestNote();
   renderActivities();
   bkSummary.innerHTML = buildSummaryHTML();
 }
@@ -326,7 +362,8 @@ function gcalUrl(trip){
   const title = `Cedar Creek Basecamp — ${t.lodge.name} stay`;
   const details = [
     'Stay at Cedar Creek Hunt & Adventure Basecamp.', '',
-    `Lodging: ${t.lodge.name} ($${t.lodge.rate}/night)`,
+    `Guests: ${guests}`,
+    `Lodging: ${t.units>1?`${t.units}× `:''}${t.lodge.name} ($${t.lodge.rate}/night${t.units>1?` each`:''})`,
     `Nights: ${t.nights} (${prettyDate(trip.in)} – ${prettyDate(trip.out)})`,
     `Lodging total: ${money(t.lodgingTotal)}`,
     t.acts.length ? `Activities: ${t.acts.map(a=>`${a.name}${a.optionLabel?` — ${a.optionLabel}`:''} (${money(a.price)})`).join(', ')}` : 'Activities: just the stay',

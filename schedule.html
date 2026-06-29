@@ -65,15 +65,29 @@
         <p class="bk-nights" id="bkNights">Pick your dates above to see how many nights you’ll stay.</p>
       </fieldset>
 
-      <!-- 2 · lodging -->
+      <!-- 2 · party size -->
       <fieldset class="bk-step">
-        <legend><span class="bk-num">2</span> Where will you stay?</legend>
+        <legend><span class="bk-num">2</span> Who's coming?</legend>
+        <div class="bk-guests">
+          <span class="bk-guests-label">Number of people</span>
+          <div class="stepper">
+            <button type="button" class="step-btn" id="guestMinus" aria-label="Fewer people">−</button>
+            <span class="step-val" id="guestVal">2</span>
+            <button type="button" class="step-btn" id="guestPlus" aria-label="More people">+</button>
+          </div>
+        </div>
+        <p class="bk-help" id="guestNote">Each Mini Cabin sleeps up to 4 — bigger groups just add cabins.</p>
+      </fieldset>
+
+      <!-- 3 · lodging -->
+      <fieldset class="bk-step">
+        <legend><span class="bk-num">3</span> Where will you stay?</legend>
         <div class="bk-lodging" id="bkLodging"></div>
       </fieldset>
 
-      <!-- 3 · activities -->
+      <!-- 4 · activities -->
       <fieldset class="bk-step">
-        <legend><span class="bk-num">3</span> What do you want to do?</legend>
+        <legend><span class="bk-num">4</span> What do you want to do?</legend>
         <p class="bk-help">Pick as many as you like — or choose “just the stay.”</p>
         <div class="bk-activities" id="bkActivities"></div>
       </fieldset>
@@ -129,8 +143,9 @@
       <div class="stat-row" id="mStats"></div>
     </div>
     <div class="cabin-confirm-bar">
+      <span class="cabin-note" id="cabinNote">Sleeps up to 4 per cabin</span>
       <button type="button" class="btn btn-ghost" id="closeBtn2" onclick="document.getElementById('backdrop').classList.remove('open');document.body.style.overflow='';">Back</button>
-      <button type="button" class="btn btn-primary" id="cabinConfirm">✓ Confirm — Mini Cabin ($150/night)</button>
+      <button type="button" class="btn btn-primary" id="cabinConfirm">✓ Confirm — Mini Cabin</button>
     </div>
   </div>
 </div>
