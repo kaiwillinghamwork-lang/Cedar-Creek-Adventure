@@ -23,34 +23,10 @@
   <aside class="camp-summary" id="campSummary"></aside>
 </section>
 
-<!-- ============ WALK THE PROPERTY (game) ============ -->
-<section class="map-section" id="explore">
-  <div class="section-head">
-    <h2>🎮 Walk the camp</h2>
-    <p>Take a stroll around the basecamp where Hammer Camp happens. Use the arrow keys (or the on-screen pad) and step up to any building to peek inside.</p>
-  </div>
-  <div class="game-wrap">
-    <div class="game-stage" id="gameStage">
-      <canvas id="gameCanvas" width="352" height="224" tabindex="0" aria-label="Walk around the basecamp — arrow keys to move"></canvas>
-      <div class="game-prompt" id="gamePrompt" hidden></div>
-      <div class="game-pad" aria-hidden="true">
-        <button type="button" class="gp-btn gp-up"    data-dir="up">▲</button>
-        <button type="button" class="gp-btn gp-left"  data-dir="left">◀</button>
-        <button type="button" class="gp-btn gp-right" data-dir="right">▶</button>
-        <button type="button" class="gp-btn gp-down"  data-dir="down">▼</button>
-      </div>
-      <button type="button" class="gp-btn gp-a" id="gameA" aria-label="Enter building">A</button>
-    </div>
-  </div>
-  <p class="hint-bar">🕹️ <b>Walk with the arrow keys</b> and step up to a building to look inside.</p>
-</section>
-
 <div id="siteFooter"></div>
 
 <script src="js/site.js"></script>
 <script src="js/data.js"></script>
 <script src="js/camp.js"></script>
-<script src="js/world.js"></script>
-<script src="js/game.js"></script>
 </body>
 </html>

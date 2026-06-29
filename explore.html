@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Explore the Property — Cedar Creek Basecamp</title>
+<link rel="icon" href="images/logo.jpg">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-bg">
+
+<div id="siteHeader"></div>
+
+<section class="map-section" id="explore">
+  <div class="section-head">
+    <h2>Explore the Property</h2>
+    <p>Take a walk around the basecamp. Use the arrow keys (or WASD, or the on-screen pad) and step up to any building to see what's inside.</p>
+  </div>
+  <div class="game-wrap">
+    <div class="game-stage" id="gameStage">
+      <canvas id="gameCanvas" width="352" height="224" tabindex="0" aria-label="Walk around the basecamp — arrow keys to move"></canvas>
+      <div class="game-prompt" id="gamePrompt" hidden></div>
+      <div class="game-pad" aria-hidden="true">
+        <button type="button" class="gp-btn gp-up"    data-dir="up">▲</button>
+        <button type="button" class="gp-btn gp-left"  data-dir="left">◀</button>
+        <button type="button" class="gp-btn gp-right" data-dir="right">▶</button>
+        <button type="button" class="gp-btn gp-down"  data-dir="down">▼</button>
+      </div>
+      <button type="button" class="gp-btn gp-a" id="gameA" aria-label="Enter building">A</button>
+    </div>
+  </div>
+  <p class="hint-bar">🕹️ <b>Walk with the arrow keys</b> (or WASD, or the on-screen pad). Step up to a building to look inside.</p>
+</section>
+
+<div id="siteFooter"></div>
+
+<script src="js/site.js"></script>
+<script src="js/data.js"></script>
+<script src="js/world.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

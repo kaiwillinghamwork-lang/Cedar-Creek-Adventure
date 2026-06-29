@@ -43,6 +43,7 @@ function renderSiteChrome(){
   const links = [
     { label:'Home',        href:'index.html' },
     { label:'About Us',    href:'about.html' },
+    { label:'Explore',     href:'explore.html' },
     { label:'Hammer Camp', href:'hammer-camp.html' },
     { label:'Contact',     href:'contact.html' },
   ];
@@ -86,7 +87,7 @@ function renderSiteChrome(){
       <a href="tel:${CONTACT.phone.replace(/[^0-9+]/g,'')}">📞 ${CONTACT.phone}</a>
     </p>
     <nav class="footer-links">
-      <a href="index.html">Home</a><a href="about.html">About Us</a><a href="hammer-camp.html">Hammer Camp</a><a href="schedule.html">Plan a Stay</a><a href="contact.html">Contact</a><a href="login.html">Log in</a>
+      <a href="index.html">Home</a><a href="about.html">About Us</a><a href="explore.html">Explore</a><a href="hammer-camp.html">Hammer Camp</a><a href="schedule.html">Plan a Stay</a><a href="contact.html">Contact</a><a href="login.html">Log in</a>
     </nav>
     <p class="footer-fine">We don't rent beds — we sell the days you'll remember. · Concept renderings, not to scale.</p>
   </footer>`;
