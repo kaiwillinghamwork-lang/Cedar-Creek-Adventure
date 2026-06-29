@@ -39,6 +39,26 @@ window.ccInquiry = function(subject, body, replyEmail){
   document.head.appendChild(l);
 })();
 
+/* ---- slide-out sidebar menu (icon rows + account chip) ---- */
+const SB_ICONS = {
+  menu:       '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  home:       '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>',
+  activities: '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.2 5.3-5.3 2.2 2.2-5.3z"/>',
+  about:      '<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="7.7" r=".7" fill="currentColor" stroke="none"/>',
+  contact:    '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6 8.5-6"/>',
+  login:      '<path d="M14 3h5v18h-5"/><path d="M3 12h11"/><path d="m10 8 4 4-4 4"/>',
+};
+function sbIcon(name){
+  return `<svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SB_ICONS[name]||''}</svg>`;
+}
+const SB_ITEMS = [
+  { label:'Home',      href:'index.html',          icon:'home' },
+  { label:'Activities',href:'index.html#activities',icon:'activities' },
+  { label:'About Us',  href:'about.html',          icon:'about' },
+  { label:'Contact',   href:'index.html#visit',    icon:'contact' },
+  { label:'Log in',    href:'login.html',          icon:'login' },
+];
+
 function renderSiteChrome(){
   const page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const hasSideMenu = !!document.getElementById('sideMenu');   // only true on the home page
@@ -73,6 +93,7 @@ function renderSiteChrome(){
 
   const headerHTML = `
   <header class="topnav">
+    <button class="sb-toggle" id="sbToggle" aria-label="Open menu">${sbIcon('menu')}</button>
     <a class="brand" href="index.html">
       <img src="images/logo.jpg" alt="" class="brand-logo">
       <span class="brand-text">Cedar Creek<small>Hunt &amp; Adventure Basecamp</small></span>
@@ -113,6 +134,39 @@ function renderSiteChrome(){
 
   const vr = document.getElementById('visitReach');   // "Find us" contact links (home page)
   if(vr) vr.innerHTML = `<a href="mailto:${CONTACT.email}">${CONTACT.email}</a><a href="tel:${CONTACT.phone.replace(/[^0-9+]/g,'')}">${CONTACT.phone}</a>`;
+
+  /* ---- the slide-out sidebar ---- */
+  const acct = user
+    ? { letter:(user.name[0]||'C').toUpperCase(), name:user.name, sub:user.email }
+    : { letter:'C', name:'Cedar Creek', sub:'Hunt & Adventure Basecamp' };
+  const sidebarHTML =
+    `<div class="sb-items">` +
+    SB_ITEMS.map(it => {
+      const active = (page === it.href.split('#')[0]) ? ' active' : '';
+      return `<a class="sb-item${active}" href="${it.href}">${sbIcon(it.icon)}<span>${it.label}</span></a>`;
+    }).join('') +
+    `</div>
+     <div class="sb-account">
+       <span class="sb-avatar">${acct.letter}</span>
+       <span class="sb-acct-text"><b>${acct.name}</b><small>${acct.sub}</small></span>
+     </div>`;
+  let sb = document.getElementById('sidebar');
+  if(!sb){
+    const ov = document.createElement('div'); ov.className='sb-overlay'; ov.id='sbOverlay'; document.body.appendChild(ov);
+    sb = document.createElement('aside'); sb.className='sidebar'; sb.id='sidebar'; sb.setAttribute('aria-label','Menu'); document.body.appendChild(sb);
+  }
+  sb.innerHTML = sidebarHTML;
+  if(!window.__sbWired){
+    window.__sbWired = true;
+    const open  = () => { sb.classList.add('open'); document.getElementById('sbOverlay').classList.add('open'); };
+    const close = () => { sb.classList.remove('open'); document.getElementById('sbOverlay').classList.remove('open'); };
+    document.addEventListener('click', e => {
+      if(e.target.closest('#sbToggle')) { open(); return; }
+      if(e.target.id === 'sbOverlay')   { close(); return; }
+      if(e.target.closest('.sb-item'))  { close(); }
+    });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') close(); });
+  }
 }
 window.renderSiteChrome = renderSiteChrome;
 renderSiteChrome();

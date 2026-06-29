@@ -179,4 +179,7 @@ if(leftActsBtn && leftActsMenu){
   if(brandHover) brandHover.addEventListener('mouseenter',()=>toggleLeftActs(true));
   leftActsMenu.addEventListener('click',e=>{ const it=e.target.closest('.left-acts-item'); if(it){ openActivity(it.dataset.key); toggleLeftActs(false); } });
   document.addEventListener('click',e=>{ if(!document.getElementById('leftActs').contains(e.target)) toggleLeftActs(false); });
+  /* the sidebar's "Activities" link lands on index.html#activities → pop the menu open */
+  if(location.hash==='#activities') setTimeout(()=>toggleLeftActs(true),60);
+  window.addEventListener('hashchange',()=>{ if(location.hash==='#activities') toggleLeftActs(true); });
 }
