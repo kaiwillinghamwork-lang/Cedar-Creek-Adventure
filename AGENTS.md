@@ -1,114 +1,207 @@
-# Cedar Creek — Reusable Agent Workflows
+# Cedar Creek — Agent Workflows & Commands
 
-## Pattern: Edit Content (Contact, Availability, Prices)
+## Pre-Commit Checklist
+Before committing any changes:
+1. Test locally: Open http://localhost:8123 in browser
+2. Check the specific page you edited (home, booking, camps, explore)
+3. Verify no console errors: Open DevTools (F12) → Console tab, should be clean
+4. Verify links work if you changed navigation
+5. Check mobile responsive if you changed layout: DevTools → toggle device toolbar
+6. Only then: `! git add . && git commit -m "..."` & `! git push`
 
-**When:** User wants to change contact info, block dates, update prices  
-**How:** Read @js/data.js and @js/site.js → identify field → edit → commit → push
+---
 
-### Contact Info Changes
-1. Read @js/site.js (CONTACT object, lines 13-17)
-2. Update email/phone/formspree
-3. Commit: `git add js/site.js && git commit -m "Update contact info"`
-4. Push
+## Quick Edits (Copy-Paste Ready)
 
-### Block/Unblock Dates
-1. Read @js/data.js (AVAILABILITY object at end)
-2. Add/remove date ranges: `{ start:"YYYY-MM-DD", end:"YYYY-MM-DD" }`
-3. Commit: `git add js/data.js && git commit -m "Update availability: [what changed]"`
-4. Push
+### Update Phone Number
+- **File:** @js/site.js, line 15
+- **Current:** `phone: '(214) 316-9082',`
+- **Command:** Edit line 15, change phone in quotes
+- **Commit:** `! git add js/site.js && git commit -m "Update phone to XXX" && git push`
 
-### Update Prices (Lodging, Activities, Camps)
-1. Read @js/data.js
-2. Find LODGING array (cabin, rv, camp rates)
-3. Find ACTIVITIES array (price field)
-4. Find CAMPS array (price field)
-5. Update values
-6. Commit: `git add js/data.js && git commit -m "Update pricing: [what changed]"`
-7. Push
+### Update Email
+- **File:** @js/site.js, line 14
+- **Current:** `email: 'kai.willingham.work@gmail.com',`
+- **Command:** Edit line 14, change email in quotes
+- **Commit:** `! git add js/site.js && git commit -m "Update email to XXX" && git push`
 
-## Pattern: Edit Descriptions & Content
+### Change Cabin Price
+- **File:** @js/data.js, line 11
+- **Current:** `rate:150,` (inside LODGING array, first item)
+- **Command:** Edit, change number
+- **Commit:** `! git add js/data.js && git commit -m "Update cabin price to \$XXX/night" && git push`
 
-**When:** User wants to change building/activity descriptions, images, features  
-**How:** Read @js/data.js (BUILDINGS, ACTIVITIES, CAMPS) → edit → commit → push
+### Change RV Spot Price
+- **File:** @js/data.js, line 14
+- **Current:** `rate:35,`
+- **Command:** Edit, change number
+- **Commit:** `! git add js/data.js && git commit -m "Update RV price to \$XXX/night" && git push`
 
-### Building Changes (name, description, features, images)
-1. Read @js/data.js (find BUILDINGS object)
-2. Locate building by key (e.g., BUILDINGS.cabins)
-3. Edit: name, tagline, desc, features[], stats[], out/in images
-4. Commit: `git add js/data.js && git commit -m "Update [building name]: [what changed]"`
-5. Push
+### Change Campground Price
+- **File:** @js/data.js, line 17
+- **Current:** `rate:25,`
+- **Command:** Edit, change number
+- **Commit:** `! git add js/data.js && git commit -m "Update campground price to \$XXX/night" && git push`
 
-### Activity Changes (name, description, price, season, options)
-1. Read @js/data.js (find ACTIVITIES array)
-2. Locate activity by key
-3. Edit: name, tagline, desc, price, day[], included[], season (dates), stats[]
-4. Commit: `git add js/data.js && git commit -m "Update [activity name]: [what changed]"`
-5. Push
+### Update Hammer Camp Price
+- **File:** @js/data.js, search for `hammer1315` and `hammer1517` (around line 230+)
+- **Field:** `price:1200,` (adjust as needed)
+- **Commit:** `! git add js/data.js && git commit -m "Update Hammer Camp pricing" && git push`
 
-### Camp Changes (name, description, price, weeks)
-1. Read @js/data.js (find CAMPS array)
-2. Locate camp by key
-3. Edit: name, tagline, desc, price, weeks[], includes[]
-4. Commit: `git add js/data.js && git commit -m "Update [camp name]: [what changed]"`
-5. Push
+---
 
-## Pattern: Design Changes
+## Block/Unblock Dates in Calendar
 
-**When:** User wants to change colors, fonts, layout, spacing  
-**How:** Read @css/style.css → edit (prefer custom properties) → commit → push
+### Add Blocked Dates
+- **File:** @js/data.js, end of file (AVAILABILITY object)
+- **Current:** 
+  ```javascript
+  const AVAILABILITY = {
+    unavailable: [
+      // { start:"2026-07-01", end:"2026-07-07" },  
+    ]
+  };
+  ```
+- **To block July 1-7:** Uncomment example or add new: `{ start:"2026-07-01", end:"2026-07-07" },`
+- **Commit:** `! git add js/data.js && git commit -m "Block dates: July 1-7" && git push`
 
-### Color/Theme Changes
-1. Read @css/style.css (top section, :root variables)
-2. Custom properties: --forest, --cedar, --sand, --accent, etc.
-3. Prefer editing CSS variables over hardcoding colors
-4. Commit: `git add css/style.css && git commit -m "Update [component]: [change]"`
-5. Push
+### Remove Blocked Dates
+- **File:** @js/data.js, AVAILABILITY.unavailable array
+- **Command:** Delete the line with the date range
+- **Commit:** `! git add js/data.js && git commit -m "Unblock dates: July 1-7" && git push`
 
-### Layout/Component Changes
-1. Read @css/style.css (find component by class name)
-2. Edit: grid, flexbox, margins, padding, borders, etc.
-3. Test locally: `! npx http-server . -p 8123` → preview browser
-4. Commit: `git add css/style.css && git commit -m "Update [component]: [change]"`
-5. Push
+---
 
-## Pattern: Deploy to Live
+## Content Changes (Building/Activity Descriptions)
 
-**When:** Dev branch is ready, deploy changes to production  
-**How:** Merge dev→main → GitHub Pages auto-builds (~1 min)
+### Update a Building Description
+- **File:** @js/data.js
+- **Format:** Find `BUILDINGS.<key> = { name: "...", desc: "...", ... }`
+- **Example:** `BUILDINGS.cabins = { ... desc:"Your own cabin...", ... }`
+- **Steps:**
+  1. Find building in BUILDINGS object
+  2. Update `name`, `tagline`, `desc`, `features[]`, `stats[]` as needed
+  3. **Don't change:** `out:` and `in:` image fields (require image uploads)
+  4. Commit: `! git add js/data.js && git commit -m "Update [building]: [what changed]" && git push`
 
-1. Ensure all changes committed on `dev`: `! git status`
-2. Switch to main: `! git checkout main`
-3. Merge dev: `! git merge dev`
-4. Push: `! git push origin main`
-5. Wait ~1 min, verify at https://kaiwillinghamwork-lang.github.io/Cedar-Creek-Adventure/
+### Update an Activity Description
+- **File:** @js/data.js, find ACTIVITIES array
+- **Format:** `{ key:"...", name:"...", price:XXX, desc:"...", ... }`
+- **Steps:**
+  1. Find activity in array
+  2. Update: `name`, `tagline`, `desc`, `price`, `day[]`, `included[]`
+  3. Update season dates if needed: `season:[[month,day], [month,day]]`
+  4. Commit: `! git add js/data.js && git commit -m "Update activity: [name]" && git push`
 
-## Pattern: Local Testing
+### Update Camp Description
+- **File:** @js/data.js, find CAMPS array
+- **Format:** Similar to activities, search for `hammer1315` or `hammer1517`
+- **Editable:** `name`, `tagline`, `desc`, `price`, `weeks[]`, `includes[]`
+- **Commit:** `! git add js/data.js && git commit -m "Update camp: [details]" && git push`
 
-**When:** Making changes, want to preview before committing  
-**How:** Run dev server, edit files, refresh browser
+---
 
-1. Start server in background: `! npx http-server . -p 8123 &`
-2. Open http://localhost:8123
-3. Make file edits
-4. Refresh browser to see changes
-5. When happy, commit & push
+## Design Changes (Colors, Layout, Fonts)
 
-## File Paths & Quick Links
+### Change Primary Color (Forest Green)
+- **File:** @css/style.css, line 1 (inside `:root { ... }`)
+- **Current:** `--forest: #2d5016;`
+- **Command:** Change hex color
+- **Test:** `! npx http-server . -p 8123` → Refresh browser at http://localhost:8123
+- **Verify:** Check home page, buttons, headings look right
+- **Commit:** `! git add css/style.css && git commit -m "Update primary color" && git push`
 
-| File | Purpose |
-|------|---------|
-| @js/data.js | Buildings, activities, camps, availability — all user-facing content |
-| @js/site.js | Contact info, header/footer chrome |
-| @css/style.css | Colors, layout, components |
-| @index.html | Home page structure |
-| @schedule.html | Booking flow |
-| @hammer-camp.html | Camps page |
-| @explore.html | Game/property tour page |
-| @admin.html | Form UI for generating code (not auto-save) |
+### Change Hero Background Image
+- **File:** @css/style.css, search for `.hero {`
+- **Current:** `background: linear-gradient(...) url('images/about-property.jpg')`
+- **To change:** Replace `about-property.jpg` with new image filename
+- **Note:** Image file must exist in `images/` folder
+- **Test:** Refresh browser, verify image shows
+- **Commit:** `! git add css/style.css && git commit -m "Update hero image" && git push`
 
-## Notes
-- Always work on `dev` branch unless deploying
-- Use `@file` to pull files directly into context (faster)
-- Use `!` to run shell commands (faster than asking)
-- Commit messages should be clear: "Update [what]: [why or what changed]"
-- After committing on dev, always push so changes sync
+### Change Font (Heading or Body)
+- **File:** @css/style.css, search for font-family in body or h1/h2
+- **Current:** Fraunces (headings), Inter (body)
+- **To change:** Update font-family property (not recommended without testing)
+- **Test:** Refresh, verify readability
+- **Commit:** `! git add css/style.css && git commit -m "Update font: [details]" && git push`
+
+---
+
+## Local Development & Testing
+
+### Start Dev Server
+```bash
+! npx http-server . -p 8123
+```
+- Opens server at http://localhost:8123
+- File changes auto-refresh in browser (just hit F5)
+- DevTools available (F12) — use Console to check for errors
+
+### Test All Pages
+1. **Home:** http://localhost:8123/index.html → Check activities, buildings, map, footer
+2. **Booking:** http://localhost:8123/schedule.html → Try date picker, party size, lodging selection
+3. **Hammer Camp:** http://localhost:8123/hammer-camp.html → Verify camps display correctly
+4. **Explore:** http://localhost:8123/explore.html → Walk around the game map
+5. **Admin:** http://localhost:8123/admin.html → Test form UI
+
+### Test on Mobile
+- DevTools (F12) → Toggle device toolbar (Ctrl+Shift+M)
+- Test on iPhone 12 and iPad sizes
+- Check that nav menu works on mobile
+
+---
+
+## Git Workflow
+
+### Commit & Push (After Testing)
+```bash
+! git add .
+! git commit -m "Update [what]: [why]"
+! git push
+```
+- Always commit after testing locally
+- Commit message format: `"Update [component]: [specific change]"`
+- Examples: `"Update cabin price to $175"`, `"Block July 1-7 in calendar"`
+
+### Deploy to Live (Merge dev → main)
+```bash
+! git checkout main
+! git merge dev
+! git push origin main
+```
+- GitHub Pages auto-builds ~1 minute
+- Verify live at: https://kaiwillinghamwork-lang.github.io/Cedar-Creek-Adventure/
+- **Only do this when dev branch is tested and ready**
+
+### Check Status
+```bash
+! git status
+! git log --oneline -5
+```
+- `git status` shows uncommitted changes
+- `git log` shows recent commits
+
+---
+
+## File Reference
+
+| File | Edit For | Key Lines/Fields |
+|------|----------|------------------|
+| @js/site.js | Phone, email, footer | Lines 14-16 (CONTACT) |
+| @js/data.js | Prices, descriptions, availability | LODGING (line 11), ACTIVITIES (line ~50), CAMPS (line ~200), AVAILABILITY (end) |
+| @css/style.css | Colors, layout, fonts, hero image | :root (line 1, colors), .hero (line ~750), component classes |
+| @index.html | Home page structure | Rarely edit — most content in data.js |
+| @schedule.html | Booking page structure | Rarely edit — logic in js/booking.js |
+| @hammer-camp.html | Camps page structure | Rarely edit — content in data.js |
+| @admin.html | Admin form UI | Edit if you want to add form fields for new content |
+
+---
+
+## Common Mistakes to Avoid
+- ❌ Commit without testing locally first
+- ❌ Forget to `git push` after committing (changes stay local only)
+- ❌ Edit on `main` branch instead of `dev`
+- ❌ Forget quote marks or commas in js/data.js (causes errors)
+- ❌ Change image filenames without uploading actual images to `images/` folder
+- ✅ Always work on `dev`, test locally, commit, push, then merge to main when ready
