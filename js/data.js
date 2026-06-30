@@ -405,3 +405,14 @@ const CAMPS = [
     ]
   }
 ];
+
+/* ============ AVAILABILITY CALENDAR ============
+   List dates/ranges that are BOOKED (unavailable for booking).
+   Edit this list to mark dates as unavailable in the booking calendar.
+   Format: ISO dates (YYYY-MM-DD) or date range objects.
+   Example: "2026-07-15" or { start:"2026-07-01", end:"2026-07-07" } */
+const AVAILABILITY = {
+  unavailable: [
+    // { start:"2026-07-01", end:"2026-07-07" },  // example: week of July 1-7
+  ]
+};

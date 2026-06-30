@@ -12,7 +12,7 @@
      post straight to your inbox without opening the visitor's email app.    */
 const CONTACT = {
   email: 'kai.willingham.work@gmail.com',
-  phone: '(509) 555-0142',
+  phone: '(214) 316-9082',
   formspree: ''
 };
 window.CONTACT = CONTACT;

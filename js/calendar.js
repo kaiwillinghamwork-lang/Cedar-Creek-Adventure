@@ -28,6 +28,21 @@
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const pretty = (d) => d.toLocaleDateString(undefined,{ weekday:'short', month:'short', day:'numeric' });
 
+  /* check if a date is unavailable (booked) */
+  function isUnavailable(date){
+    if(typeof AVAILABILITY === 'undefined' || !AVAILABILITY.unavailable) return false;
+    const dateISO = iso(date);
+    for(const block of AVAILABILITY.unavailable){
+      if(typeof block === 'string' && block === dateISO) return true;
+      if(block.start && block.end){
+        const start = new Date(block.start+'T00:00:00');
+        const end = new Date(block.end+'T00:00:00');
+        if(date >= start && date <= end) return true;
+      }
+    }
+    return false;
+  }
+
   let view = firstOfMonth(today);   // left-hand month
   let start = null, end = null;     // Date objects
   let flex = 0;
@@ -41,16 +56,18 @@
     for(let d=1; d<=days; d++){
       const date = new Date(y,m,d);
       const past = date < today;
+      const unavail = isUnavailable(date);
       const isStart = sameDay(date,start);
       const isEnd = sameDay(date,end);
       const inRange = start && end && date > start && date < end;
       const cls = ['cal-cell'];
       if(past) cls.push('past');
+      if(unavail) cls.push('unavailable');
       if(isStart) cls.push('sel start');
       if(isEnd) cls.push('sel end');
       if(inRange) cls.push('inrange');
       if(sameDay(date,today)) cls.push('today');
-      cells += `<button type="button" class="${cls.join(' ')}" ${past?'disabled':''} data-iso="${iso(date)}">${d}</button>`;
+      cells += `<button type="button" class="${cls.join(' ')}" ${(past || unavail)?'disabled':''} data-iso="${iso(date)}">${d}</button>`;
     }
     return `
       <div class="cal-month">
