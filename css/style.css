@@ -1180,3 +1180,97 @@ h1,h2,h3,.brand-text,.hero h1,.section-head h2,.browse h2,.camp-hero h1,.about-h
 .sb-acct-text{display:flex;flex-direction:column;line-height:1.25;min-width:0;}
 .sb-acct-text b{font-size:.95rem;color:#fff;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sb-acct-text small{color:#8a8a8a;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ============================================================ */
+/* ARCTIC-WILD INSPIRED LAYER                                   */
+/*   Requested by Mykle (arcticwild.com layout) + Taylor        */
+/*   (high-def photo "zoom-in look"). Everything on the home    */
+/*   page, eye-drawing sections, image zoom-on-hover.           */
+/* ============================================================ */
+
+/* --- universal image zoom-on-hover ("the zoom in look") ---
+   Wrap any <img> in a .zoom element; the image scales up slowly
+   inside a fixed, rounded, clipped frame. */
+.zoom{overflow:hidden;border-radius:14px;position:relative;display:block;}
+.zoom img{
+  display:block;width:100%;height:100%;object-fit:cover;
+  transition:transform .9s cubic-bezier(.2,.6,.2,1);
+  will-change:transform;
+}
+.zoom:hover img,.zoom:focus-within img{transform:scale(1.09);}
+/* apply the same zoom to existing building card thumbnails + activity media */
+.card-thumb{overflow:hidden;}
+.card-thumb img{transition:transform .9s cubic-bezier(.2,.6,.2,1);will-change:transform;}
+.card:hover .card-thumb img{transform:scale(1.08);}
+.act-media{overflow:hidden;border-radius:12px;}
+.act-media img{transition:transform .9s cubic-bezier(.2,.6,.2,1);}
+.act-media:hover img{transform:scale(1.08);}
+
+/* --- section rhythm --- */
+.aw-section{max-width:1180px;margin:0 auto;padding:76px 22px;}
+.aw-head{text-align:center;max-width:720px;margin:0 auto 42px;}
+.aw-head .kicker{
+  text-transform:uppercase;letter-spacing:2.5px;font-size:.78rem;font-weight:700;
+  color:#8a6d3b;margin-bottom:12px;
+}
+.aw-head h2{font-family:'Fraunces',Georgia,serif;font-size:clamp(1.9rem,4vw,2.7rem);
+  line-height:1.1;color:#23301f;margin-bottom:14px;}
+.aw-head p{color:#5b6153;font-size:1.06rem;line-height:1.6;}
+
+/* --- adventures grid (arcticwild's scannable icon cards) --- */
+.aw-acts-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;
+}
+.aw-act{
+  position:relative;text-align:left;background:#fff;border:1px solid #e7e3d8;
+  border-radius:16px;padding:22px 20px;cursor:pointer;overflow:hidden;
+  transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+}
+.aw-act:hover{transform:translateY(-5px);box-shadow:0 16px 34px rgba(35,48,31,.14);border-color:#d6cdb8;}
+.aw-act::after{
+  content:"";position:absolute;left:0;top:0;height:4px;width:100%;
+  background:linear-gradient(90deg,#8a6d3b,#b79552);transform:scaleX(0);transform-origin:left;
+  transition:transform .28s ease;
+}
+.aw-act:hover::after{transform:scaleX(1);}
+.aw-act .ico{font-size:2rem;display:block;margin-bottom:12px;}
+.aw-act h3{font-family:'Fraunces',Georgia,serif;font-size:1.14rem;color:#26331f;margin-bottom:5px;line-height:1.2;}
+.aw-act .sub{color:#6b7060;font-size:.9rem;margin-bottom:12px;}
+.aw-act .price{font-weight:700;color:#8a6d3b;font-size:.95rem;}
+.aw-act .price small{color:#9aa08c;font-weight:500;}
+.aw-act .go{position:absolute;right:18px;bottom:18px;color:#b79552;font-weight:700;
+  opacity:0;transform:translateX(-6px);transition:.22s;}
+.aw-act:hover .go{opacity:1;transform:translateX(0);}
+
+/* --- about / guide band (dark, photo-driven) --- */
+.aw-about{background:#1a231a;color:#e9ead9;}
+.aw-about .aw-inner{
+  max-width:1120px;margin:0 auto;padding:74px 22px;
+  display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center;
+}
+.aw-about .kicker{text-transform:uppercase;letter-spacing:2.5px;font-size:.78rem;font-weight:700;color:#c7a86a;margin-bottom:12px;}
+.aw-about h2{font-family:'Fraunces',Georgia,serif;font-size:clamp(1.9rem,4vw,2.6rem);line-height:1.12;margin-bottom:18px;color:#fff;}
+.aw-about p{color:#c3c8b5;line-height:1.7;margin-bottom:16px;font-size:1.04rem;}
+.aw-about .aw-photo{aspect-ratio:4/3;}
+.aw-about .aw-photo img{height:100%;}
+
+/* --- testimonials --- */
+.aw-quotes{background:#f6f3ea;}
+.aw-quote-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;}
+.aw-quote{background:#fff;border-radius:16px;padding:28px 26px;border:1px solid #ece7da;box-shadow:0 6px 18px rgba(35,48,31,.05);}
+.aw-quote .stars{color:#d1a53c;letter-spacing:2px;margin-bottom:12px;}
+.aw-quote p{font-size:1.05rem;line-height:1.6;color:#3d4536;font-style:italic;margin-bottom:16px;}
+.aw-quote .who{font-weight:700;color:#26331f;font-size:.95rem;}
+.aw-quote .who small{display:block;color:#8a8f7c;font-weight:500;font-style:normal;margin-top:2px;}
+
+/* --- final CTA band --- */
+.aw-cta{background:linear-gradient(135deg,#2b3a24,#16220f);color:#fff;text-align:center;}
+.aw-cta .aw-inner{max-width:760px;margin:0 auto;padding:80px 22px;}
+.aw-cta h2{font-family:'Fraunces',Georgia,serif;font-size:clamp(2rem,4.5vw,2.9rem);margin-bottom:16px;}
+.aw-cta p{color:#cfd6c1;font-size:1.1rem;margin-bottom:30px;line-height:1.6;}
+.aw-cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+
+@media(max-width:820px){
+  .aw-about .aw-inner{grid-template-columns:1fr;gap:30px;}
+  .aw-section{padding:54px 18px;}
+}

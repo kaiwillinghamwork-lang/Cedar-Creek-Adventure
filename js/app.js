@@ -183,3 +183,31 @@ if(leftActsBtn && leftActsMenu){
   if(location.hash==='#activities') setTimeout(()=>toggleLeftActs(true),60);
   window.addEventListener('hashchange',()=>{ if(location.hash==='#activities') toggleLeftActs(true); });
 }
+
+/* ---- homepage Adventures grid (arcticwild-style cards) ---- */
+(function(){
+  const wrap = document.getElementById('homeActs');
+  if(!wrap || typeof ACTIVITIES === 'undefined') return;
+  function priceLabel(a){
+    if(typeof a.price === 'number') return `$${a.price.toLocaleString()}`;
+    if(Array.isArray(a.options) && a.options.length){
+      const min = Math.min(...a.options.map(o=>o.price));
+      return `from $${min.toLocaleString()}`;
+    }
+    return '';
+  }
+  wrap.innerHTML = ACTIVITIES.map(a=>{
+    const active = isInSeason(a) ? '<span class="left-acts-badge">● IN SEASON</span>' : '';
+    return `<button class="aw-act" data-key="${a.key}">
+      <span class="ico">${a.icon||'🏕️'}</span>
+      <h3>${a.name}${active}</h3>
+      <div class="sub">${a.short||''}</div>
+      <div class="price">${priceLabel(a)} <small>${a.days?`· ${a.days} days`:''}</small></div>
+      <span class="go">See more →</span>
+    </button>`;
+  }).join('');
+  wrap.addEventListener('click', e=>{
+    const b = e.target.closest('.aw-act[data-key]');
+    if(b) openActivity(b.dataset.key);
+  });
+})();

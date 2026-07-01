@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cedar-creek",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["http-server", ".", "-c-1"],
+      "port": 8180,
+      "autoPort": true
+    }
+  ]
+}
