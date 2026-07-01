@@ -164,15 +164,25 @@ Before committing any changes:
 - Commit message format: `"Update [component]: [specific change]"`
 - Examples: `"Update cabin price to $175"`, `"Block July 1-7 in calendar"`
 
-### Deploy to Live (Merge dev → main)
+### Deploy to Live (automated CI/CD)
+A GitHub Actions pipeline (`.github/workflows/deploy.yml`) auto-deploys on push to `main`:
+1. **validate** — `node --check` on every JS file (a broken commit never goes live)
+2. **deploy** — publishes the static site to GitHub Pages
+
+**To promote dev → production:**
 ```bash
 ! git checkout main
 ! git merge dev
-! git push origin main
+! git push origin main      # requires user OK — pushes to the production branch
+! git checkout dev
 ```
-- GitHub Pages auto-builds ~1 minute
+Pushing to `main` triggers the pipeline; the live site updates in ~1–2 min. No manual build steps.
+
+**One-time activation (not yet done — user chose "set up, don't deploy"):**
+- The workflow currently lives on `dev` only. It must be merged/pushed to `main` to run.
+- In GitHub: **Settings → Pages → Source → "GitHub Actions"** (one-time toggle).
 - Verify live at: https://kaiwillinghamwork-lang.github.io/Cedar-Creek-Adventure/
-- **Only do this when dev branch is tested and ready**
+- **Only promote to main when dev is tested and ready.**
 
 ### Check Status
 ```bash
