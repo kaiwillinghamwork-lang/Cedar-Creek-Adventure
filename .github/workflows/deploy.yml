@@ -1,0 +1,55 @@
+name: Deploy to GitHub Pages
+
+# Push to main → site goes live. No manual steps.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:        # also lets you trigger a deploy by hand from the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deploy at a time; newer pushes cancel older in-flight runs.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  # CI: catch broken JavaScript before it can ever go live.
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check every JS file parses
+        run: |
+          echo "Validating JavaScript syntax..."
+          find js -name '*.js' -print0 | xargs -0 -I{} node --check "{}"
+          echo "All JS files OK."
+      - name: Confirm the homepage exists
+        run: test -f index.html && echo "index.html present."
+
+  # CD: publish to GitHub Pages. Only runs if validation passed.
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'          # this is a plain static site — publish the repo root as-is
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
