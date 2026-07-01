@@ -8,48 +8,52 @@
 <meta property="og:title" content="Cedar Creek Hunt &amp; Adventure Basecamp">
 <meta property="og:description" content="Guided hunts and adventure camps in Colville, WA. 28 acres on Cedar Creek with cabins, RV spots, and camping.">
 <meta property="og:type" content="website">
-<title>Cedar Creek Hunt &amp; Adventure Basecamp | Cabins & Guided Hunts in Colville, WA</title>
+<title>Cedar Creek Hunt &amp; Adventure Basecamp | Cabins &amp; Guided Hunts in Colville, WA</title>
 <link rel="icon" href="images/logo.jpg">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="aw-body">
 
-<!-- shared logo nav (built by site.js) -->
+<!-- shared sticky nav (built by site.js) -->
 <div id="siteHeader"></div>
 
-<!-- ============ LEFT ACTIVITIES DROPDOWN ============ -->
-<div class="left-acts" id="leftActs">
-  <button class="left-acts-btn" id="leftActsBtn" aria-expanded="false">🎯 Activities <span class="caret">▾</span></button>
-  <div class="left-acts-menu" id="leftActsMenu" hidden></div>
-</div>
-
-<!-- ============ HERO ============ -->
-<header class="hero" id="top">
-  <svg class="hero-trees" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-    <g fill="#16301f">
-      <polygon points="120,400 60,180 180,400"/><polygon points="120,330 70,150 170,330"/>
-      <polygon points="320,400 250,200 390,400"/><polygon points="1280,400 1220,170 1340,400"/>
-      <polygon points="1100,400 1040,210 1160,400"/>
-    </g>
-    <g fill="#1c3a26" opacity=".8">
-      <polygon points="220,400 160,230 280,400"/><polygon points="1180,400 1120,240 1240,400"/>
-      <polygon points="40,400 0,250 90,400"/><polygon points="1400,400 1350,250 1440,400"/>
-    </g>
-  </svg>
-  <div class="kicker">Cedar Creek Basecamp · Colville, Washington</div>
-  <h1>This is the trip you'll be telling stories about.</h1>
-  <p class="sub">28 acres of creek-side timber, guided days outdoors, and nights around the fire — the kind of place that ruins ordinary vacations. Click any spot on the map to see what it feels like to be here.</p>
-  <div class="meta">
-    <span class="chip">🎯 Guided hunts &amp; adventure</span>
-    <span class="chip">🔥 Meals &amp; fire — handled for you</span>
-    <span class="chip">🏔️ Your own cabin on the creek</span>
+<!-- ============ HERO (full-screen photo, arctic-wild style) ============ -->
+<header class="aw-hero" id="top">
+  <div class="aw-hero-media">
+    <img src="images/about-property.jpg" alt="Cedar Creek property along the creek at dusk">
   </div>
-  <div class="hero-cta">
-    <a class="btn btn-primary" href="schedule.html">📅 Plan your stay</a>
-    <a class="btn btn-ghost" href="#map">Explore the basecamp</a>
+  <div class="aw-hero-scrim"></div>
+  <div class="aw-hero-inner">
+    <div class="aw-hero-kicker">Colville, Washington &middot; 28 acres on East Fork Cedar Creek</div>
+    <h1>Enjoy the Solitude<br>&amp; Wild of Cedar Creek</h1>
+    <p>Professionally guided hunts, adventure camps, and creek-side cabin stays in the Selkirk foothills of northeast Washington.</p>
+    <div class="aw-hero-btns">
+      <a class="aw-btn" href="schedule.html">Plan Your Stay</a>
+      <a class="aw-btn aw-btn-ghost" href="#adventures">View Adventures</a>
+    </div>
   </div>
-  <div class="scroll-hint">↓ Explore the basecamp</div>
+  <a class="aw-scroll" href="#adventures" aria-label="Explore below">Explore Below<span>&darr;</span></a>
 </header>
+
+<!-- ============ ADVENTURES GRID ============ -->
+<section class="aw-section" id="adventures">
+  <div class="aw-head">
+    <div class="kicker">Guided &amp; Self-Guided</div>
+    <h2>Choose Your Adventure</h2>
+    <p>Trophy hunts, water days, backcountry expeditions and rentals &mdash; everything the basecamp runs, right here. Tap any one to see the day, what's included, and pricing.</p>
+  </div>
+  <div class="aw-acts-grid" id="homeActs"></div>
+</section>
+
+<!-- ============ THE PROPERTY (destinations) ============ -->
+<section class="aw-section aw-property" id="property">
+  <div class="aw-head">
+    <div class="kicker">The Basecamp</div>
+    <h2>Explore the Property</h2>
+    <p>Each spot on the 28 acres is built around a moment you'll remember. Tap any one to step inside and see the exterior &amp; interior.</p>
+  </div>
+  <div class="grid" id="cardGrid"></div>
+</section>
 
 <!-- ============ INTERACTIVE MAP ============ -->
 <section class="map-section" id="map">
@@ -269,39 +273,29 @@
   <p class="hint-bar">👆 <b>Click any building</b> on the map (or a card below) to see exterior &amp; interior concepts and what's inside.</p>
 </section>
 
-<!-- ============ ADVENTURES GRID (arcticwild-style, on the homepage) ============ -->
-<section class="aw-section" id="adventures">
-  <div class="aw-head">
-    <div class="kicker">Guided &amp; Self-Guided</div>
-    <h2>Pick your adventure</h2>
-    <p>Trophy hunts, water days, backcountry expeditions and rentals — everything the basecamp runs, right here. Tap any one to see the day, what's included, and pricing.</p>
-  </div>
-  <div class="aw-acts-grid" id="homeActs"></div>
-</section>
-
-<!-- ============ BROWSE ALL ============ -->
-<section class="browse" id="browse">
-  <h2>Every Part of the Stay</h2>
-  <p class="lead">Each one's built around a moment you'll remember. Tap any to step inside.</p>
-  <div class="grid" id="cardGrid"></div>
-</section>
-
-<!-- ============ VISIT / MAP ============ -->
-<section class="visit" id="visit">
-  <div class="visit-inner">
-    <div>
-      <div class="kicker">Find us</div>
-      <h2>Northeast Washington, on the creek</h2>
-      <p>Cedar Creek Basecamp sits on 28 acres along East Fork Cedar Creek, just outside Colville in the Selkirk foothills — about an hour and a half north of Spokane.</p>
-      <p>3928 Cedar Creek Rd · Colville, WA 99114</p>
-      <div class="visit-reach" id="visitReach"></div>
+<!-- ============ TESTIMONIALS ============ -->
+<section class="aw-quotes">
+  <div class="aw-section" style="padding-top:0;padding-bottom:0;">
+    <div class="aw-head">
+      <div class="kicker">What people say</div>
+      <h2>Trips They Still Talk About</h2>
     </div>
-    <div class="visit-map">
-      <iframe
-        title="Map to Cedar Creek Basecamp"
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        src="https://www.google.com/maps?q=3928%20Cedar%20Creek%20Rd,%20Colville,%20WA%2099114&z=12&output=embed"></iframe>
+    <div class="aw-quote-grid">
+      <div class="aw-quote">
+        <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p>&ldquo;Best hunting trip I've ever been on. The guides knew every ridge, and coming back to a hot meal and the sauna every night was unreal.&rdquo;</p>
+        <div class="who">Dave R.<small>Whitetail rut hunt</small></div>
+      </div>
+      <div class="aw-quote">
+        <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p>&ldquo;We booked a cabin for the family and never wanted to leave. The creek, the fire pit, the quiet &mdash; exactly what we needed.&rdquo;</p>
+        <div class="who">The Hollis Family<small>Cabin stay, 3 nights</small></div>
+      </div>
+      <div class="aw-quote">
+        <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p>&ldquo;Sent my son to Hammer Camp and he came back tougher, more confident, and wouldn't stop talking about it. Worth every penny.&rdquo;</p>
+        <div class="who">Marcus T.<small>Hammer Camp parent</small></div>
+      </div>
     </div>
   </div>
 </section>
@@ -311,40 +305,33 @@
   <div class="aw-inner">
     <div>
       <div class="kicker">Your hosts</div>
-      <h2>Run by people who actually live it</h2>
-      <p>Cedar Creek is guided by Mykle — a combat veteran who's spent his life in the backcountry — alongside Kai, a jiu-jitsu purple belt with years on the mats. Between them they bring the discipline, woodcraft, and know-how that make a trip out here feel effortless.</p>
-      <p>They handle the hard parts — the meals, the fire, the gear, the game — so your only job is to show up and soak it in.</p>
-      <a class="btn btn-primary" href="hammer-camp.html">Meet the Hammer Camp crew →</a>
+      <h2>Run by People Who Actually Live It</h2>
+      <p>Cedar Creek is guided by Mykle &mdash; a combat veteran who's spent his life in the backcountry &mdash; alongside Kai, a jiu-jitsu purple belt with years on the mats. Between them they bring the discipline, woodcraft, and know-how that make a trip out here feel effortless.</p>
+      <p>They handle the hard parts &mdash; the meals, the fire, the gear, the game &mdash; so your only job is to show up and soak it in.</p>
+      <a class="aw-btn" href="hammer-camp.html">Meet the Hammer Camp Crew</a>
     </div>
     <div class="zoom aw-photo">
-      <img src="images/about-property.jpg" alt="Cedar Creek property along the creek" loading="lazy">
+      <img src="images/img-01.jpg" alt="Cedar Creek guides and the lodge" loading="lazy">
     </div>
   </div>
 </section>
 
-<!-- ============ TESTIMONIALS ============ -->
-<section class="aw-quotes">
-  <div class="aw-section" style="padding-top:0;padding-bottom:0;">
-    <div class="aw-head">
-      <div class="kicker">What people say</div>
-      <h2>Trips they still talk about</h2>
+<!-- ============ FIND US / MAP ============ -->
+<section class="visit" id="visit">
+  <div class="visit-inner">
+    <div>
+      <div class="kicker">Find us</div>
+      <h2>Northeast Washington, on the Creek</h2>
+      <p>Cedar Creek Basecamp sits on 28 acres along East Fork Cedar Creek, just outside Colville in the Selkirk foothills &mdash; about an hour and a half north of Spokane.</p>
+      <p>3928 Cedar Creek Rd &middot; Colville, WA 99114</p>
+      <div class="visit-reach" id="visitReach"></div>
     </div>
-    <div class="aw-quote-grid">
-      <div class="aw-quote">
-        <div class="stars">★★★★★</div>
-        <p>“Best hunting trip I've ever been on. The guides knew every ridge, and coming back to a hot meal and the sauna every night was unreal.”</p>
-        <div class="who">Dave R.<small>Whitetail rut hunt</small></div>
-      </div>
-      <div class="aw-quote">
-        <div class="stars">★★★★★</div>
-        <p>“We booked a cabin for the family and never wanted to leave. The creek, the fire pit, the quiet — exactly what we needed.”</p>
-        <div class="who">The Hollis Family<small>Cabin stay, 3 nights</small></div>
-      </div>
-      <div class="aw-quote">
-        <div class="stars">★★★★★</div>
-        <p>“Sent my son to Hammer Camp and he came back tougher, more confident, and wouldn't stop talking about it. Worth every penny.”</p>
-        <div class="who">Marcus T.<small>Hammer Camp parent</small></div>
-      </div>
+    <div class="visit-map zoom">
+      <iframe
+        title="Map to Cedar Creek Basecamp"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps?q=3928%20Cedar%20Creek%20Rd,%20Colville,%20WA%2099114&z=12&output=embed"></iframe>
     </div>
   </div>
 </section>
@@ -352,11 +339,11 @@
 <!-- ============ FINAL CTA ============ -->
 <section class="aw-cta">
   <div class="aw-inner">
-    <h2>Ready for the trip you'll be telling stories about?</h2>
-    <p>Pick your dates, choose where you'll stay, and we'll handle the rest. Questions first? Reach out — we answer fast.</p>
+    <h2>Ready for the Trip You'll Be Telling Stories About?</h2>
+    <p>Pick your dates, choose where you'll stay, and we'll handle the rest. Questions first? Reach out &mdash; we answer fast.</p>
     <div class="aw-cta-btns">
-      <a class="btn btn-primary" href="schedule.html">📅 Plan your stay</a>
-      <a class="btn btn-ghost" href="#adventures">Browse adventures</a>
+      <a class="aw-btn" href="schedule.html">Plan Your Stay</a>
+      <a class="aw-btn aw-btn-ghost" href="#adventures">Browse Adventures</a>
     </div>
   </div>
 </section>
@@ -389,7 +376,7 @@
   </div>
 </div>
 
-<!-- ============ ACTIVITY INFO MODAL (opened from the left dropdown) ============ -->
+<!-- ============ ACTIVITY INFO MODAL (opened from the adventures grid) ============ -->
 <div class="modal-backdrop" id="actBackdrop">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="aTitle">
     <div class="modal-head">

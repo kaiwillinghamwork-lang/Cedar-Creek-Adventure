@@ -69,8 +69,10 @@ function renderSiteChrome(){
   }
 
   const links = [
-    { label:'Home',        href:'index.html' },
-    { label:'Hammer Camp', href:'hammer-camp.html' },
+    { label:'Adventures',   href:'index.html#adventures' },
+    { label:'The Property', href:'index.html#property' },
+    { label:'Hammer Camp',  href:'hammer-camp.html' },
+    { label:'Contact',      href:'index.html#visit' },
   ];
 
   function navLinkHTML(l){
@@ -97,8 +99,7 @@ function renderSiteChrome(){
     </a>
     <nav class="nav-links" aria-label="Primary">
       ${links.map(navLinkHTML).join('')}
-      ${activitiesHTML}
-      <a href="schedule.html" class="nav-cta${page==='schedule.html'?' active':''}">📅 Plan a Stay</a>
+      <a href="schedule.html" class="nav-cta${page==='schedule.html'?' active':''}">Plan a Stay</a>
       ${authHTML}
     </nav>
   </header>`;

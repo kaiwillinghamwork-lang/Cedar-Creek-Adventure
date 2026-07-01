@@ -1274,3 +1274,147 @@ h1,h2,h3,.brand-text,.hero h1,.section-head h2,.browse h2,.camp-hero h1,.about-h
   .aw-about .aw-inner{grid-template-columns:1fr;gap:30px;}
   .aw-section{padding:54px 18px;}
 }
+
+/* ============================================================ */
+/* ARCTIC-WILD FULL THEME (rebuild)                            */
+/*   Mirrors arcticwild.com: sticky nav, full-screen photo     */
+/*   hero, uppercase filled buttons, big destination cards,    */
+/*   dark footer. Off-white canvas, charcoal text, pine+gold.  */
+/*   Appended last so it wins over earlier layers.             */
+/* ============================================================ */
+:root{
+  --aw-bg:#f6f4ee; --aw-ink:#282c24; --aw-muted:#5f6555;
+  --aw-pine:#1e3a2a; --aw-pine-2:#264a35; --aw-gold:#b98a3e; --aw-gold-2:#caa15a;
+  --aw-line:#e4e0d4;
+}
+.aw-body{background:var(--aw-bg);color:var(--aw-ink);}
+
+/* ---------- STICKY NAV ---------- */
+.topnav{
+  position:sticky;top:0;z-index:60;
+  background:rgba(23,40,29,.97);backdrop-filter:blur(8px);
+  display:flex;align-items:center;gap:20px;
+  padding:12px 26px;border-bottom:1px solid rgba(255,255,255,.08);
+  box-shadow:0 2px 20px rgba(0,0,0,.18);
+}
+.topnav .brand{display:flex;align-items:center;gap:12px;text-decoration:none;margin-right:auto;}
+.topnav .brand-logo{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.25);}
+.topnav .brand-text{display:flex;flex-direction:column;line-height:1.05;color:#fff;
+  font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:1.16rem;}
+.topnav .brand-text small{font-family:'Inter',sans-serif;font-weight:500;font-size:.62rem;
+  letter-spacing:1.6px;text-transform:uppercase;color:var(--aw-gold-2);margin-top:2px;}
+.nav-links{display:flex;align-items:center;gap:6px;}
+.nav-links a{
+  font-family:'Inter',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:1.3px;
+  text-transform:uppercase;color:#d8ddcf;text-decoration:none;padding:9px 13px;border-radius:6px;
+  transition:color .18s,background .18s;
+}
+.nav-links a:hover{color:#fff;background:rgba(255,255,255,.08);}
+.nav-links a.active{color:var(--aw-gold-2);}
+.nav-links .nav-cta{
+  background:var(--aw-gold);color:#20170a;margin-left:6px;
+  padding:10px 18px;border-radius:6px;letter-spacing:1.4px;
+}
+.nav-links .nav-cta:hover{background:var(--aw-gold-2);color:#20170a;}
+.nav-links .nav-login,.nav-links .nav-account{color:#cdd3c4;}
+.nav-links .nav-account{color:var(--aw-gold-2);}
+.sb-toggle{display:none;background:none;border:0;color:#fff;cursor:pointer;padding:6px;margin-right:4px;}
+.sb-toggle svg{width:26px;height:26px;}
+
+/* ---------- FULL-SCREEN HERO ---------- */
+.aw-hero{
+  position:relative;min-height:calc(100vh - 66px);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:80px 22px 120px;overflow:hidden;
+}
+.aw-hero-media{position:absolute;inset:0;z-index:0;}
+.aw-hero-media img{width:100%;height:100%;object-fit:cover;transform:scale(1.05);
+  animation:awKen 22s ease-out forwards;}
+@keyframes awKen{from{transform:scale(1.12)}to{transform:scale(1)}}
+.aw-hero-scrim{position:absolute;inset:0;z-index:1;
+  background:linear-gradient(180deg,rgba(15,25,18,.55) 0%,rgba(15,25,18,.30) 40%,rgba(15,25,18,.72) 100%);}
+.aw-hero-inner{position:relative;z-index:2;max-width:900px;color:#fff;}
+.aw-hero-kicker{font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:3px;
+  font-size:.8rem;font-weight:600;color:var(--aw-gold-2);margin-bottom:20px;}
+.aw-hero h1{font-family:'Fraunces',Georgia,serif;font-weight:600;color:#fff;
+  font-size:clamp(2.4rem,6vw,4.6rem);line-height:1.04;margin:0 0 20px;
+  text-shadow:0 2px 30px rgba(0,0,0,.4);}
+.aw-hero p{font-family:'Inter',sans-serif;font-size:clamp(1rem,2vw,1.22rem);line-height:1.6;
+  color:#eef0e8;max-width:640px;margin:0 auto 34px;}
+.aw-hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.aw-scroll{position:absolute;left:50%;transform:translateX(-50%);bottom:30px;z-index:2;
+  font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:2px;font-size:.72rem;
+  font-weight:600;color:#fff;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:6px;opacity:.9;}
+.aw-scroll span{font-size:1.1rem;animation:awBob 1.8s ease-in-out infinite;}
+@keyframes awBob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* ---------- BUTTONS (filled, uppercase, square-ish) ---------- */
+.aw-btn,.aw-body .btn-primary,.aw-body .btn.btn-primary{
+  display:inline-block;font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:1.5px;
+  font-size:.82rem;font-weight:700;padding:15px 30px;border-radius:6px;cursor:pointer;border:2px solid var(--aw-gold);
+  background:var(--aw-gold);color:#20170a;text-decoration:none;transition:transform .18s,background .18s,color .18s;
+}
+.aw-btn:hover,.aw-body .btn-primary:hover{background:var(--aw-gold-2);border-color:var(--aw-gold-2);transform:translateY(-2px);}
+.aw-btn-ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.7);}
+.aw-btn-ghost:hover{background:#fff;color:var(--aw-pine);border-color:#fff;}
+
+/* ---------- SECTION HEADINGS ---------- */
+.aw-section{max-width:1180px;margin:0 auto;padding:84px 22px;}
+.aw-head{text-align:center;max-width:730px;margin:0 auto 46px;}
+.aw-head .kicker{text-transform:uppercase;letter-spacing:2.6px;font-size:.78rem;font-weight:700;
+  color:var(--aw-gold);margin-bottom:12px;font-family:'Inter',sans-serif;}
+.aw-head h2{font-family:'Fraunces',Georgia,serif;font-size:clamp(2rem,4.2vw,2.9rem);
+  line-height:1.08;color:var(--aw-pine);margin-bottom:14px;}
+.aw-head p{color:var(--aw-muted);font-size:1.06rem;line-height:1.6;font-family:'Inter',sans-serif;}
+
+/* ---------- PROPERTY / DESTINATION CARDS ---------- */
+.aw-property .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:26px;}
+.aw-property .card{
+  background:#fff;border:1px solid var(--aw-line);border-radius:14px;overflow:hidden;cursor:pointer;
+  box-shadow:0 6px 20px rgba(30,40,25,.06);transition:transform .24s,box-shadow .24s;display:flex;flex-direction:column;
+}
+.aw-property .card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(30,40,25,.16);}
+.aw-property .card-thumb{aspect-ratio:16/10;overflow:hidden;}
+.aw-property .card-thumb img{width:100%;height:100%;object-fit:cover;
+  transition:transform .9s cubic-bezier(.2,.6,.2,1);}
+.aw-property .card:hover .card-thumb img{transform:scale(1.09);}
+.aw-property .card-body{padding:22px 22px 24px;}
+.aw-property .card-body .tagline{text-transform:uppercase;letter-spacing:1.8px;font-size:.68rem;
+  font-weight:700;color:var(--aw-gold);margin-bottom:8px;font-family:'Inter',sans-serif;}
+.aw-property .card-body h3{font-family:'Fraunces',Georgia,serif;font-size:1.4rem;color:var(--aw-pine);margin-bottom:8px;}
+.aw-property .card-body p{color:var(--aw-muted);font-size:.96rem;line-height:1.55;font-family:'Inter',sans-serif;}
+.aw-property .card-body .open{margin-top:14px;color:var(--aw-gold);font-weight:700;text-transform:uppercase;
+  letter-spacing:1.2px;font-size:.76rem;font-family:'Inter',sans-serif;}
+
+/* ---------- FIND-US / VISIT ---------- */
+.aw-body .visit{max-width:1180px;margin:0 auto;padding:40px 22px 84px;}
+.aw-body .visit-inner{display:grid;grid-template-columns:1fr 1.1fr;gap:44px;align-items:center;}
+.aw-body .visit .kicker{text-transform:uppercase;letter-spacing:2.6px;font-size:.78rem;font-weight:700;color:var(--aw-gold);margin-bottom:12px;font-family:'Inter',sans-serif;}
+.aw-body .visit h2{font-family:'Fraunces',Georgia,serif;font-size:clamp(1.8rem,3.6vw,2.5rem);color:var(--aw-pine);margin-bottom:14px;}
+.aw-body .visit p{color:var(--aw-muted);line-height:1.6;margin-bottom:10px;font-family:'Inter',sans-serif;}
+.aw-body .visit-map{aspect-ratio:16/11;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(30,40,25,.14);}
+.aw-body .visit-map iframe{width:100%;height:100%;border:0;display:block;}
+.visit-reach{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;}
+.visit-reach a{color:var(--aw-pine);font-weight:600;text-decoration:none;border-bottom:2px solid var(--aw-gold);padding-bottom:2px;font-family:'Inter',sans-serif;}
+
+/* ---------- DARK FOOTER ---------- */
+.aw-body .site-footer{background:var(--aw-pine);color:#cfd6c4;border-top:0;padding:56px 22px 30px;}
+.aw-body .footer-inner{max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;gap:34px;flex-wrap:wrap;padding-bottom:26px;border-bottom:1px solid rgba(255,255,255,.12);}
+.aw-body .footer-name{font-family:'Fraunces',Georgia,serif;color:#fff;font-size:1.15rem;}
+.aw-body .footer-addr{color:#9fb097;font-size:.9rem;margin-top:4px;font-family:'Inter',sans-serif;}
+.aw-body .footer-links{display:flex;flex-direction:column;gap:8px;}
+.aw-body .footer-links a{color:#cfd6c4;text-decoration:none;text-transform:uppercase;letter-spacing:1.4px;font-size:.76rem;font-weight:600;font-family:'Inter',sans-serif;}
+.aw-body .footer-links a:hover{color:var(--aw-gold-2);}
+.aw-body .footer-reach{display:flex;flex-direction:column;gap:8px;}
+.aw-body .footer-reach a{color:#cfd6c4;text-decoration:none;font-family:'Inter',sans-serif;}
+.aw-body .footer-reach a:hover{color:#fff;}
+.aw-body .footer-copy{max-width:1180px;margin:20px auto 0;color:#8fa085;font-size:.82rem;text-align:center;font-family:'Inter',sans-serif;}
+
+/* ---------- MOBILE ---------- */
+@media(max-width:900px){
+  .nav-links{display:none;}
+  .sb-toggle{display:inline-flex;}
+  .topnav{padding:10px 16px;}
+  .aw-about .aw-inner{grid-template-columns:1fr;}
+  .aw-body .visit-inner{grid-template-columns:1fr;gap:24px;}
+  .aw-section{padding:58px 18px;}
+}
